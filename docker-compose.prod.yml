@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: sms-hub-app-prod
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./storage:/var/www/storage
+      - ./bootstrap/cache:/var/www/bootstrap/cache
+    networks:
+      - sms-hub-network
+    depends_on:
+      - db
+      - redis
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+
+  db:
+    image: mysql:8.0
+    container_name: sms-hub-db-prod
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - sms-hub-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: sms-hub-redis-prod
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./docker/redis/data:/data
+    networks:
+      - sms-hub-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: sms-hub-nginx-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d/prod.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+    networks:
+      - sms-hub-network
+    depends_on:
+      - app
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: sms-hub-queue-prod
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./storage:/var/www/storage
+    networks:
+      - sms-hub-network
+    depends_on:
+      - db
+      - redis
+    command: php artisan queue:work --daemon
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+
+networks:
+  sms-hub-network:
+    driver: bridge
