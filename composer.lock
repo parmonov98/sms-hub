@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0591c1d390f0d01faadb4c686373e2fa",
+    "content-hash": "a7c0e39597d3ac98a393703a6fc5a1af",
     "packages": [
         {
             "name": "brick/math",
@@ -1402,16 +1402,16 @@
         },
         {
             "name": "laravel/passport",
-            "version": "v13.2.0",
+            "version": "v13.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/passport.git",
-                "reference": "0356d18201f6dd9b3f47dc086d85d4656582a1af"
+                "reference": "8152e794698e0ddbf87f56f2bd428c4fc20e2dde"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/passport/zipball/0356d18201f6dd9b3f47dc086d85d4656582a1af",
-                "reference": "0356d18201f6dd9b3f47dc086d85d4656582a1af",
+                "url": "https://api.github.com/repos/laravel/passport/zipball/8152e794698e0ddbf87f56f2bd428c4fc20e2dde",
+                "reference": "8152e794698e0ddbf87f56f2bd428c4fc20e2dde",
                 "shasum": ""
             },
             "require": {
@@ -1475,7 +1475,7 @@
                 "issues": "https://github.com/laravel/passport/issues",
                 "source": "https://github.com/laravel/passport"
             },
-            "time": "2025-08-19T13:34:50+00:00"
+            "time": "2025-09-15T20:48:33+00:00"
         },
         {
             "name": "laravel/prompts",
@@ -1599,16 +1599,16 @@
         },
         {
             "name": "laravel/telescope",
-            "version": "v5.11.3",
+            "version": "v5.11.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/telescope.git",
-                "reference": "7684604e104e7755b70dcacfeee06888e2470689"
+                "reference": "8b7bd77857d6b1b8c9362560cde74911cee68ab8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/telescope/zipball/7684604e104e7755b70dcacfeee06888e2470689",
-                "reference": "7684604e104e7755b70dcacfeee06888e2470689",
+                "url": "https://api.github.com/repos/laravel/telescope/zipball/8b7bd77857d6b1b8c9362560cde74911cee68ab8",
+                "reference": "8b7bd77857d6b1b8c9362560cde74911cee68ab8",
                 "shasum": ""
             },
             "require": {
@@ -1662,9 +1662,9 @@
             ],
             "support": {
                 "issues": "https://github.com/laravel/telescope/issues",
-                "source": "https://github.com/laravel/telescope/tree/v5.11.3"
+                "source": "https://github.com/laravel/telescope/tree/v5.11.4"
             },
-            "time": "2025-08-21T14:25:40+00:00"
+            "time": "2025-09-12T14:36:07+00:00"
         },
         {
             "name": "laravel/tinker",

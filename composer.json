@@ -9,8 +9,8 @@
         "php": "^8.2",
         "guzzlehttp/guzzle": "^7.10",
         "laravel/framework": "^12.0",
-        "laravel/passport": "^13.2",
-        "laravel/telescope": "^5.11",
+        "laravel/passport": "*",
+        "laravel/telescope": "*",
         "laravel/tinker": "^2.10.1",
         "predis/predis": "^3.2"
     },
