@@ -19,10 +19,11 @@ class EskizTemplateService
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $token,
-            ])->get($this->baseUrl . '/template');
+            ])->get($this->baseUrl . '/user/templates');
 
             if ($response->successful()) {
-                return $response->json();
+                $data = $response->json();
+                return $data['result'] ?? [];
             }
 
             Log::error('Failed to get templates from Eskiz', [
@@ -131,15 +132,32 @@ class EskizTemplateService
                 ->first();
 
             if (!$existingTemplate) {
+                $status = $this->mapEskizStatus($templateData['status'] ?? 'pending');
+                $name = $templateData['original_text'] ?? 'Unknown Template';
+                // Truncate name if too long
+                if (strlen($name) > 500) {
+                    $name = substr($name, 0, 497) . '...';
+                }
+                
                 SmsTemplate::create([
                     'provider_id' => $eskizProvider->id,
-                    'name' => $templateData['name'] ?? 'Unknown Template',
-                    'content' => $templateData['text'] ?? '',
-                    'status' => $this->mapEskizStatus($templateData['status'] ?? 'pending'),
+                    'name' => $name,
+                    'content' => $templateData['template'] ?? $templateData['original_text'] ?? '',
+                    'status' => $status,
                     'provider_template_id' => $templateData['id'] ?? null,
-                    'approved_at' => $templateData['status'] === 'approved' ? now() : null,
+                    'approved_at' => in_array($templateData['status'] ?? '', ['service', 'inproccess', 'reklama']) ? now() : null,
+                    'rejected_at' => ($templateData['status'] ?? '') === 'rejected' ? now() : null,
                 ]);
                 $synced++;
+            } else {
+                // Update existing template status
+                $status = $this->mapEskizStatus($templateData['status'] ?? 'pending');
+                $existingTemplate->update([
+                    'status' => $status,
+                    'content' => $templateData['template'] ?? $templateData['original_text'] ?? $existingTemplate->content,
+                    'approved_at' => in_array($templateData['status'] ?? '', ['service', 'inproccess', 'reklama']) ? now() : $existingTemplate->approved_at,
+                    'rejected_at' => ($templateData['status'] ?? '') === 'rejected' ? now() : $existingTemplate->rejected_at,
+                ]);
             }
         }
 
@@ -162,9 +180,11 @@ class EskizTemplateService
     private function mapEskizStatus(string $eskizStatus): string
     {
         return match ($eskizStatus) {
-            'approved' => 'approved',
-            'pending' => 'pending',
-            'rejected' => 'rejected',
+            'service' => 'approved',      // Сервисный - approved
+            'inproccess' => 'approved',   // В процессе - approved
+            'moderation' => 'pending',    // На модерации - pending
+            'reklama' => 'approved',      // Рекламный - approved
+            'rejected' => 'rejected',     // Отказано - rejected
             default => 'pending',
         };
     }

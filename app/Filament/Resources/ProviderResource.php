@@ -134,6 +134,11 @@ class ProviderResource extends Resource
                     ->counts('messages')
                     ->sortable(),
 
+                Tables\Columns\TextColumn::make('templates_count')
+                    ->label('Templates')
+                    ->counts('templates')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
@@ -167,6 +172,11 @@ class ProviderResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('view_templates')
+                    ->label('Templates')
+                    ->icon('heroicon-o-document-text')
+                    ->color('info')
+                    ->url(fn ($record) => route('filament.admin.resources.providers.view', $record) . '?tab=templates'),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
