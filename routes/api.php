@@ -4,7 +4,6 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\ProviderController;
 use App\Http\Controllers\Api\UsageController;
-use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\Admin\ProviderController as AdminProviderController;
 use App\Http\Controllers\Admin\ProjectController as AdminProjectController;
 use Illuminate\Http\Request;
@@ -63,7 +62,3 @@ Route::middleware(['auth:api', 'admin'])->prefix('v1/admin')->group(function () 
     Route::delete('/projects/{project}/providers/{provider}', [AdminProjectController::class, 'detachProvider']);
 });
 
-// Webhook routes (no authentication required)
-Route::prefix('v1/webhooks')->group(function () {
-    Route::post('/{provider}/dlr', [WebhookController::class, 'deliveryReport']);
-});
