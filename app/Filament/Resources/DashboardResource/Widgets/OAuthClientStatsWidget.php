@@ -13,7 +13,7 @@ class OAuthClientStatsWidget extends BaseWidget
         $totalClients = OAuthClient::count();
         $activeClients = OAuthClient::where('revoked', false)->count();
         $revokedClients = OAuthClient::where('revoked', true)->count();
-        $passwordClients = OAuthClient::where('password_client', true)->count();
+        $passwordClients = OAuthClient::whereJsonContains('grant_types', 'password')->count();
 
         return [
             Stat::make('Total OAuth Clients', $totalClients)

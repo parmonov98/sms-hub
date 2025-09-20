@@ -38,7 +38,7 @@ class OAuthClientResource extends Resource
                             ->label('Client Name')
                             ->placeholder('My API Client'),
                         
-                        Forms\Components\Select::make('user_id')
+                        Forms\Components\Select::make('owner_id')
                             ->label('Owner')
                             ->relationship('user', 'name')
                             ->searchable()
@@ -54,19 +54,21 @@ class OAuthClientResource extends Resource
                 
                 Forms\Components\Section::make('Client Configuration')
                     ->schema([
-                        Forms\Components\TextInput::make('redirect')
-                            ->label('Redirect URI')
-                            ->url()
+                        Forms\Components\TextInput::make('redirect_uris')
+                            ->label('Redirect URIs')
                             ->placeholder('https://example.com/callback')
-                            ->helperText('Leave empty for client credentials grant'),
+                            ->helperText('Comma-separated list of redirect URIs'),
                         
-                        Forms\Components\Toggle::make('personal_access_client')
-                            ->label('Personal Access Client')
-                            ->helperText('Allows the client to create personal access tokens'),
-                        
-                        Forms\Components\Toggle::make('password_client')
-                            ->label('Password Client')
-                            ->helperText('Allows the client to use password grant'),
+                        Forms\Components\CheckboxList::make('grant_types')
+                            ->label('Grant Types')
+                            ->options([
+                                'authorization_code' => 'Authorization Code',
+                                'password' => 'Password',
+                                'client_credentials' => 'Client Credentials',
+                                'personal_access' => 'Personal Access',
+                                'refresh_token' => 'Refresh Token',
+                            ])
+                            ->columns(2),
                         
                         Forms\Components\Toggle::make('revoked')
                             ->label('Revoked')
@@ -95,13 +97,18 @@ class OAuthClientResource extends Resource
                     ->searchable()
                     ->sortable(),
                 
-                Tables\Columns\IconColumn::make('personal_access_client')
-                    ->label('Personal Access')
-                    ->boolean(),
-                
-                Tables\Columns\IconColumn::make('password_client')
-                    ->label('Password Grant')
-                    ->boolean(),
+                Tables\Columns\TextColumn::make('grant_types')
+                    ->label('Grant Types')
+                    ->badge()
+                    ->separator(',')
+                    ->color(fn (string $state): string => match ($state) {
+                        'authorization_code' => 'success',
+                        'password' => 'warning',
+                        'client_credentials' => 'info',
+                        'personal_access' => 'primary',
+                        'refresh_token' => 'secondary',
+                        default => 'gray',
+                    }),
                 
                 Tables\Columns\IconColumn::make('revoked')
                     ->label('Status')
@@ -117,11 +124,15 @@ class OAuthClientResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::make('personal_access_client')
-                    ->label('Personal Access Client'),
-                
-                Tables\Filters\TernaryFilter::make('password_client')
-                    ->label('Password Client'),
+                Tables\Filters\SelectFilter::make('grant_types')
+                    ->label('Grant Type')
+                    ->options([
+                        'authorization_code' => 'Authorization Code',
+                        'password' => 'Password',
+                        'client_credentials' => 'Client Credentials',
+                        'personal_access' => 'Personal Access',
+                        'refresh_token' => 'Refresh Token',
+                    ]),
                 
                 Tables\Filters\TernaryFilter::make('revoked')
                     ->label('Revoked'),
