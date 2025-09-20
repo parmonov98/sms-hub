@@ -21,12 +21,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Test route to verify API is working
+Route::get('/test', function () {
+    return response()->json(['message' => 'API is working!', 'timestamp' => now()]);
+});
+
 // OAuth2 Authentication routes (handled by Passport)
 // Route::post('/oauth/token', [AuthController::class, 'getToken']); // Use Passport's default route
 Route::post('/v1/auth/refresh', [AuthController::class, 'refreshToken']);
 
-// Protected API routes
-Route::middleware('auth:api')->group(function () {
+// Protected API routes - using client credentials middleware for machine-to-machine auth
+Route::middleware('client_credentials')->group(function () {
     // API v1 routes
     Route::prefix('v1')->group(function () {
         // Authentication

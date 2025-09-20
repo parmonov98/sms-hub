@@ -7,6 +7,7 @@ use App\Models\OAuthClient;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -48,7 +49,7 @@ class OAuthClientResource extends Resource
                         Forms\Components\TextInput::make('secret')
                             ->label('Client Secret')
                             ->disabled()
-                            ->dehydrated(false)
+                            ->dehydrated(true)
                             ->helperText('This will be generated automatically when creating a new client'),
                     ])->columns(2),
                 
@@ -138,6 +139,28 @@ class OAuthClientResource extends Resource
                     ->label('Revoked'),
             ])
             ->actions([
+                Tables\Actions\Action::make('view_secret')
+                    ->label('View Secret')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->modalHeading('Client Secret')
+                    ->modalContent(fn (OAuthClient $record) => view('filament.modals.client-secret', [
+                        'clientId' => $record->id,
+                        'clientSecret' => $record->secret,
+                    ]))
+                    ->modalActions([
+                        Tables\Actions\Action::make('copy_secret')
+                            ->label('Copy Secret')
+                            ->color('primary')
+                            ->action(function (OAuthClient $record) {
+                                $this->js("navigator.clipboard.writeText('{$record->secret}')");
+                                Notification::make()
+                                    ->title('Client Secret Copied!')
+                                    ->success()
+                                    ->send();
+                            }),
+                    ]),
+                
                 Tables\Actions\Action::make('regenerate_secret')
                     ->label('Regenerate Secret')
                     ->icon('heroicon-o-arrow-path')

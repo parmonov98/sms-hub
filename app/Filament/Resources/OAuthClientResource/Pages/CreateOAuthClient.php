@@ -4,6 +4,8 @@ namespace App\Filament\Resources\OAuthClientResource\Pages;
 
 use App\Filament\Resources\OAuthClientResource;
 use Filament\Actions;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Str;
 
@@ -13,6 +15,9 @@ class CreateOAuthClient extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        // Generate a UUID for the client ID
+        $data['id'] = Str::uuid();
+        
         // Generate a random client secret
         $data['secret'] = Str::random(40);
         
@@ -36,5 +41,33 @@ class CreateOAuthClient extends CreateRecord
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
+    }
+
+    protected function getCreatedNotificationTitle(): ?string
+    {
+        return 'OAuth Client Created Successfully';
+    }
+
+    protected function getCreatedNotification(): ?Notification
+    {
+        $client = $this->record;
+        
+        return Notification::make()
+            ->title('OAuth Client Created Successfully')
+            ->body("Client ID: {$client->id}\nClient Secret: {$client->secret}")
+            ->success()
+            ->persistent()
+            ->actions([
+                Action::make('copy_secret')
+                    ->label('Copy Secret')
+                    ->action(function () use ($client) {
+                        // This will copy the secret to clipboard via JavaScript
+                        $this->js("navigator.clipboard.writeText('{$client->secret}')");
+                        Notification::make()
+                            ->title('Client Secret Copied!')
+                            ->success()
+                            ->send();
+                    }),
+            ]);
     }
 }

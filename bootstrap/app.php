@@ -14,6 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'client_credentials' => \App\Http\Middleware\ClientCredentialsAuth::class,
+        ]);
+        
+        // Configure API middleware to return JSON responses
+        $middleware->api(prepend: [
+            // Remove Sanctum middleware since it's not installed
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
