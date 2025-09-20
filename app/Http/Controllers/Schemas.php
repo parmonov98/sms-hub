@@ -144,6 +144,20 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(property="access_token", type="string", description="Access token", example="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9..."),
  *     @OA\Property(property="refresh_token", type="string", description="Refresh token", example="def50200...")
  * )
+ * 
+ * @OA\Schema(
+ *     schema="User",
+ *     type="object",
+ *     title="User",
+ *     description="User information",
+ *     @OA\Property(property="id", type="integer", description="User ID", example=1),
+ *     @OA\Property(property="name", type="string", description="User name", example="John Doe"),
+ *     @OA\Property(property="email", type="string", format="email", description="User email", example="john@example.com"),
+ *     @OA\Property(property="is_admin", type="boolean", description="Admin status", example=false),
+ *     @OA\Property(property="email_verified_at", type="string", format="datetime", nullable=true, description="Email verification timestamp", example="2024-01-15T10:30:00Z"),
+ *     @OA\Property(property="created_at", type="string", format="datetime", description="Creation timestamp", example="2024-01-15T10:30:00Z"),
+ *     @OA\Property(property="updated_at", type="string", format="datetime", description="Last update timestamp", example="2024-01-15T10:30:00Z")
+ * )
  */
 class Schemas
 {

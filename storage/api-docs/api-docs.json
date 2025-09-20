@@ -20,6 +20,263 @@
         }
     ],
     "paths": {
+        "/oauth/token": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get OAuth2 access token",
+                "description": "Obtain an access token using OAuth2 client credentials or password grant",
+                "operationId": "getToken",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "grant_type",
+                                    "client_id",
+                                    "client_secret"
+                                ],
+                                "properties": {
+                                    "grant_type": {
+                                        "description": "OAuth2 grant type",
+                                        "type": "string",
+                                        "enum": [
+                                            "client_credentials",
+                                            "password"
+                                        ],
+                                        "example": "client_credentials"
+                                    },
+                                    "client_id": {
+                                        "description": "OAuth2 client ID",
+                                        "type": "string",
+                                        "example": "01996688-68b6-73da-b265-98d48d707a69"
+                                    },
+                                    "client_secret": {
+                                        "description": "OAuth2 client secret",
+                                        "type": "string",
+                                        "example": "your-client-secret"
+                                    },
+                                    "username": {
+                                        "description": "Username (for password grant)",
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "description": "Password (for password grant)",
+                                        "type": "string",
+                                        "example": "password"
+                                    },
+                                    "scope": {
+                                        "description": "Requested scopes",
+                                        "type": "string",
+                                        "example": "read write"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token obtained successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid grant type or credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "invalid_request"
+                                        },
+                                        "error_description": {
+                                            "type": "string",
+                                            "example": "The request is missing a required parameter"
+                                        },
+                                        "hint": {
+                                            "type": "string",
+                                            "example": "Check the grant_type parameter"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid client credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "invalid_client"
+                                        },
+                                        "error_description": {
+                                            "type": "string",
+                                            "example": "Client authentication failed"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/refresh": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Refresh OAuth2 access token",
+                "description": "Refresh an expired access token using refresh token",
+                "operationId": "refreshToken",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "grant_type",
+                                    "refresh_token"
+                                ],
+                                "properties": {
+                                    "grant_type": {
+                                        "description": "Grant type",
+                                        "type": "string",
+                                        "example": "refresh_token"
+                                    },
+                                    "refresh_token": {
+                                        "description": "Refresh token",
+                                        "type": "string",
+                                        "example": "def50200..."
+                                    },
+                                    "client_id": {
+                                        "description": "OAuth2 client ID",
+                                        "type": "string",
+                                        "example": "01996688-68b6-73da-b265-98d48d707a69"
+                                    },
+                                    "client_secret": {
+                                        "description": "OAuth2 client secret",
+                                        "type": "string",
+                                        "example": "your-client-secret"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token refreshed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid refresh token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "invalid_grant"
+                                        },
+                                        "error_description": {
+                                            "type": "string",
+                                            "example": "The refresh token is invalid"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid refresh token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "invalid_client"
+                                        },
+                                        "error_description": {
+                                            "type": "string",
+                                            "example": "Client authentication failed"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/me": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get current user info",
+                "description": "Get information about the currently authenticated user",
+                "operationId": "getCurrentUser",
+                "responses": {
+                    "200": {
+                        "description": "User information retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/messages": {
             "get": {
                 "tags": [
@@ -1650,6 +1907,53 @@
                     }
                 },
                 "type": "object"
+            },
+            "User": {
+                "title": "User",
+                "description": "User information",
+                "properties": {
+                    "id": {
+                        "description": "User ID",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "User name",
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "email": {
+                        "description": "User email",
+                        "type": "string",
+                        "format": "email",
+                        "example": "john@example.com"
+                    },
+                    "is_admin": {
+                        "description": "Admin status",
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "email_verified_at": {
+                        "description": "Email verification timestamp",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-01-15T10:30:00Z",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "description": "Creation timestamp",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-01-15T10:30:00Z"
+                    },
+                    "updated_at": {
+                        "description": "Last update timestamp",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-01-15T10:30:00Z"
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -1690,6 +1994,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Authentication",
+            "description": "OAuth2 authentication endpoints"
+        },
         {
             "name": "Providers",
             "description": "SMS provider management"
