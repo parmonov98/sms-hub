@@ -7,21 +7,27 @@ use Illuminate\Support\Facades\Log;
 
 class EskizProvider implements SmsProviderInterface
 {
-    private string $apiKey;
+    private string $token;
     private string $baseUrl = 'https://notify.eskiz.uz/api';
 
     public function __construct(array $config)
     {
-        $this->apiKey = $config['api_key'] ?? '';
+        $this->token = $config['token'] ?? '';
     }
 
     public function send(string $to, string $from, string $text, array $options = []): array
     {
         try {
+            if (!$this->token) {
+                return [
+                    'status' => 'failed',
+                    'error' => 'No authentication token provided',
+                ];
+            }
+
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type' => 'application/json',
-            ])->post($this->baseUrl . '/message/sms/send', [
+                'Authorization' => 'Bearer ' . $this->token,
+            ])->asForm()->post($this->baseUrl . '/message/sms/send', [
                 'mobile_phone' => $to,
                 'message' => $text,
                 'from' => $from,
@@ -39,15 +45,33 @@ class EskizProvider implements SmsProviderInterface
                 ];
             }
 
+            $errorMessage = $response->json()['message'] ?? 'Unknown error';
+            $statusCode = $response->status();
+
+            // Handle specific Eskiz API errors
+            if ($statusCode === 401) {
+                if (str_contains($errorMessage, 'role not found')) {
+                    $errorMessage = 'Account does not have SMS sending permissions. Please contact Eskiz support to activate SMS functionality.';
+                } elseif (str_contains($errorMessage, 'Неверный Email или пароль')) {
+                    $errorMessage = 'Invalid Eskiz credentials. Please check your email and password.';
+                } elseif (str_contains($errorMessage, 'Method error')) {
+                    $errorMessage = 'Invalid API method or endpoint. Please check Eskiz API documentation.';
+                }
+            }
+
             Log::error('Eskiz SMS send failed', [
                 'response' => $response->json(),
-                'status' => $response->status(),
+                'status' => $statusCode,
+                'error_message' => $errorMessage,
+                'to' => $to,
+                'from' => $from,
             ]);
 
             return [
                 'status' => 'failed',
-                'error' => $response->json()['message'] ?? 'Unknown error',
+                'error' => $errorMessage,
                 'provider_response' => $response->json(),
+                'status_code' => $statusCode,
             ];
 
         } catch (\Exception $e) {
@@ -67,8 +91,15 @@ class EskizProvider implements SmsProviderInterface
     public function checkStatus(string $messageId): array
     {
         try {
+            if (!$this->token) {
+                return [
+                    'status' => 'unknown',
+                    'error' => 'No authentication token provided',
+                ];
+            }
+
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Authorization' => 'Bearer ' . $this->token,
             ])->get($this->baseUrl . '/message/sms/status/' . $messageId);
 
             if ($response->successful()) {
@@ -115,7 +146,7 @@ class EskizProvider implements SmsProviderInterface
 
     public function validateConfig(array $config): bool
     {
-        return !empty($config['api_key']);
+        return !empty($config['token']);
     }
 
     private function mapStatus(string $eskizStatus): string

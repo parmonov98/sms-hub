@@ -2,11 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Project;
 use App\Models\Provider;
-use App\Models\ProviderCredential;
+use App\Models\ProviderToken;
 use App\Providers\Sms\EskizProvider;
-use App\Providers\Sms\PlayMobileProvider;
 use App\Providers\Sms\SmsProviderInterface;
 use Illuminate\Support\Facades\Log;
 
@@ -17,60 +15,58 @@ class SmsService
     /**
      * Send SMS with failover support.
      */
-    public function sendSms(Project $project, string $to, string $from, string $text, array $options = []): array
+    public function sendSms(string $to, string $from, string $text, array $options = []): array
     {
-        // Get active providers for this project, ordered by priority
-        $credentials = $project->providerCredentials()
-            ->with('provider')
-            ->active()
-            ->get()
-            ->sortBy('provider.priority');
+        // Get active providers ordered by priority
+        $providers = Provider::enabled()
+            ->byPriority()
+            ->with('accessToken')
+            ->get();
 
-        if ($credentials->isEmpty()) {
+        if ($providers->isEmpty()) {
             return [
                 'status' => 'failed',
-                'error' => 'No active SMS providers configured for this project',
+                'error' => 'No active SMS providers configured',
             ];
         }
 
         // Try each provider in order until one succeeds
-        foreach ($credentials as $credential) {
-            $provider = $this->getProviderInstance($credential);
+        foreach ($providers as $provider) {
+            $providerInstance = $this->getProviderInstance($provider);
             
-            if (!$provider) {
+            if (!$providerInstance) {
                 Log::warning('Invalid provider configuration', [
-                    'project_id' => $project->id,
-                    'provider_id' => $credential->provider_id,
+                    'provider_id' => $provider->id,
+                    'provider_name' => $provider->display_name,
                 ]);
                 continue;
             }
 
-            $result = $provider->send($to, $from, $text, $options);
+            $result = $providerInstance->send($to, $from, $text, $options);
 
             if ($result['status'] === 'sent') {
                 Log::info('SMS sent successfully', [
-                    'project_id' => $project->id,
-                    'provider' => $credential->provider->display_name,
+                    'provider_id' => $provider->id,
+                    'provider' => $provider->display_name,
                     'to' => $to,
                     'message_id' => $result['message_id'] ?? null,
                 ]);
 
                 return array_merge($result, [
-                    'provider_id' => $credential->provider_id,
-                    'provider_name' => $credential->provider->display_name,
+                    'provider_id' => $provider->id,
+                    'provider_name' => $provider->display_name,
                 ]);
             }
 
             Log::warning('SMS send failed, trying next provider', [
-                'project_id' => $project->id,
-                'provider' => $credential->provider->display_name,
+                'provider_id' => $provider->id,
+                'provider' => $provider->display_name,
                 'error' => $result['error'] ?? 'Unknown error',
             ]);
         }
 
         // All providers failed
         Log::error('All SMS providers failed', [
-            'project_id' => $project->id,
             'to' => $to,
             'from' => $from,
         ]);
@@ -84,80 +80,115 @@ class SmsService
     /**
      * Check message status.
      */
-    public function checkStatus(Project $project, string $messageId, int $providerId): array
+    public function checkStatus(string $messageId, int $providerId): array
     {
-        $credential = $project->providerCredentials()
-            ->where('provider_id', $providerId)
-            ->active()
-            ->first();
+        $provider = Provider::find($providerId);
 
-        if (!$credential) {
+        if (!$provider) {
             return [
                 'status' => 'unknown',
-                'error' => 'Provider not found or inactive',
+                'error' => 'Provider not found',
             ];
         }
 
-        $provider = $this->getProviderInstance($credential);
+        $providerInstance = $this->getProviderInstance($provider);
         
-        if (!$provider) {
+        if (!$providerInstance) {
             return [
                 'status' => 'unknown',
                 'error' => 'Invalid provider configuration',
             ];
         }
 
-        return $provider->checkStatus($messageId);
+        return $providerInstance->checkStatus($messageId);
     }
 
     /**
      * Get provider instance with caching.
      */
-    private function getProviderInstance(ProviderCredential $credential): ?SmsProviderInterface
+    private function getProviderInstance(Provider $provider): ?SmsProviderInterface
     {
-        $key = $credential->id;
+        $key = $provider->id;
 
         if (isset($this->providerInstances[$key])) {
             return $this->providerInstances[$key];
         }
 
-        $config = json_decode($credential->credentials, true);
+        // Get the access token for this provider
+        $accessToken = $provider->accessToken;
         
-        if (!$config) {
+        if (!$accessToken || !$accessToken->isValid()) {
+            Log::warning('No valid access token for provider', [
+                'provider_id' => $provider->id,
+                'provider_name' => $provider->display_name,
+            ]);
             return null;
         }
 
-        $provider = match ($credential->provider->display_name) {
-            'eskiz' => new EskizProvider($config),
-            'playmobile' => new PlayMobileProvider($config),
+        // Create provider instance with token
+        $providerInstance = match ($provider->display_name) {
+            'eskiz' => new EskizProvider(['token' => $accessToken->token_value]),
             default => null,
         };
 
-        if ($provider && $provider->validateConfig($config)) {
-            $this->providerInstances[$key] = $provider;
-            return $provider;
+        if ($providerInstance) {
+            $this->providerInstances[$key] = $providerInstance;
+            return $providerInstance;
         }
 
         return null;
     }
 
     /**
-     * Get available providers for a project.
+     * Get available providers.
      */
-    public function getAvailableProviders(Project $project): array
+    public function getAvailableProviders(): array
     {
-        return $project->providerCredentials()
-            ->with('provider')
-            ->active()
+        return Provider::enabled()
+            ->byPriority()
+            ->with('accessToken')
             ->get()
-            ->map(function ($credential) {
+            ->map(function ($provider) {
                 return [
-                    'id' => $credential->provider_id,
-                    'name' => $credential->provider->display_name,
-                    'capabilities' => $credential->provider->capabilities,
-                    'priority' => $credential->provider->priority,
+                    'id' => $provider->id,
+                    'name' => $provider->display_name,
+                    'capabilities' => $provider->capabilities,
+                    'priority' => $provider->priority,
+                    'has_token' => $provider->accessToken && $provider->accessToken->isValid(),
                 ];
             })
             ->toArray();
+    }
+
+    /**
+     * Store or update a provider token.
+     */
+    public function storeProviderToken(int $providerId, string $tokenType, string $tokenValue, ?\DateTime $expiresAt = null, array $metadata = []): ProviderToken
+    {
+        // Deactivate existing tokens of the same type
+        ProviderToken::where('provider_id', $providerId)
+            ->where('token_type', $tokenType)
+            ->update(['is_active' => false]);
+
+        // Create new token
+        return ProviderToken::create([
+            'provider_id' => $providerId,
+            'token_type' => $tokenType,
+            'token_value' => $tokenValue,
+            'expires_at' => $expiresAt,
+            'metadata' => $metadata,
+            'is_active' => true,
+        ]);
+    }
+
+    /**
+     * Get provider token.
+     */
+    public function getProviderToken(int $providerId, string $tokenType = 'access'): ?ProviderToken
+    {
+        return ProviderToken::where('provider_id', $providerId)
+            ->where('token_type', $tokenType)
+            ->valid()
+            ->first();
     }
 }

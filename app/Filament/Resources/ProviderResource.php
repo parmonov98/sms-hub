@@ -72,15 +72,6 @@ class ProviderResource extends Resource
                             ->helperText('Select the features this provider supports'),
                     ]),
 
-                Forms\Components\Section::make('Default Configuration')
-                    ->schema([
-                        Forms\Components\KeyValue::make('default_config')
-                            ->label('Default Settings')
-                            ->keyLabel('Setting')
-                            ->valueLabel('Value')
-                            ->helperText('Default configuration values for this provider (e.g., sender_id, encoding)')
-                            ->columnSpanFull(),
-                    ]),
             ]);
     }
 

@@ -13,23 +13,35 @@ class Provider extends Model
         'display_name',
         'description',
         'capabilities',
-        'default_config',
         'is_enabled',
         'priority',
     ];
 
     protected $casts = [
         'capabilities' => 'array',
-        'default_config' => 'array',
         'is_enabled' => 'boolean',
     ];
 
     /**
-     * Get the provider credentials for this provider.
+     * Get the provider tokens for this provider.
      */
-    public function credentials()
+    public function tokens()
     {
-        return $this->hasMany(ProviderCredential::class);
+        return $this->hasMany(ProviderToken::class);
+    }
+
+    /**
+     * Get the active access token for this provider.
+     */
+    public function accessToken()
+    {
+        return $this->hasOne(ProviderToken::class)
+            ->where('token_type', 'access')
+            ->where('is_active', true)
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+            });
     }
 
     /**
@@ -38,6 +50,14 @@ class Provider extends Model
     public function messages()
     {
         return $this->hasMany(Message::class);
+    }
+
+    /**
+     * Get the SMS templates for this provider.
+     */
+    public function templates()
+    {
+        return $this->hasMany(SmsTemplate::class);
     }
 
     /**

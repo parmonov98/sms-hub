@@ -10,7 +10,7 @@ class Message extends Model
     use HasFactory;
 
     protected $fillable = [
-        'project_id',
+        'project_id', // Optional in new system
         'provider_id',
         'provider_message_id',
         'to',

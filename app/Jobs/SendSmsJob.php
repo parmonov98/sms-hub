@@ -40,16 +40,8 @@ class SendSmsJob implements ShouldQueue
             return;
         }
 
-        $project = $message->project;
-        
-        if (!$project) {
-            Log::error('Project not found for SMS job', ['message_id' => $this->messageId]);
-            return;
-        }
-
-        // Send SMS
+        // Send SMS (no project needed in new system)
         $result = $smsService->sendSms(
-            $project,
             $message->to,
             $message->from,
             $message->text,

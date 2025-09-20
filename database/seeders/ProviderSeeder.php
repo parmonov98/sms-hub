@@ -18,17 +18,8 @@ class ProviderSeeder extends Seeder
                 'display_name' => 'eskiz',
                 'description' => 'Eskiz SMS Gateway - Uzbekistan',
                 'capabilities' => ['dlr' => true, 'unicode' => true, 'concat' => true, 'flash' => false],
-                'default_config' => ['api_key' => ''],
                 'is_enabled' => true,
                 'priority' => 1,
-            ],
-            [
-                'display_name' => 'playmobile',
-                'description' => 'PlayMobile SMS Gateway - Uzbekistan',
-                'capabilities' => ['dlr' => false, 'unicode' => true, 'concat' => true, 'flash' => false],
-                'default_config' => ['username' => '', 'password' => ''],
-                'is_enabled' => true,
-                'priority' => 2,
             ],
         ];
 

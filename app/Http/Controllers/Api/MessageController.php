@@ -105,7 +105,47 @@ class MessageController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Validate the request
+        $validated = $request->validate([
+            'to' => 'required|string|max:20',
+            'message' => 'required|string|max:1600',
+            'provider' => 'nullable|string|exists:providers,display_name',
+            'sender_id' => 'nullable|string|max:11',
+            'callback_url' => 'nullable|url',
+            'priority' => 'nullable|integer|min:1|max:5',
+        ]);
+
+        // Get the OAuth client ID from the request (set by our middleware)
+        $clientId = $request->attributes->get('oauth_client_id');
+        
+        if (!$clientId) {
+            return response()->json(['message' => 'Client authentication required'], 401);
+        }
+
+        // Create the message record (no project needed in new system)
+        $message = \App\Models\Message::create([
+            'to' => $validated['to'],
+            'from' => $validated['sender_id'] ?? 'SMSHub',
+            'text' => $validated['message'],
+            'status' => 'queued',
+            'idempotency_key' => uniqid('msg_', true),
+        ]);
+
+        // If a specific provider is requested, try to use it
+        if (isset($validated['provider'])) {
+            $provider = \App\Models\Provider::where('display_name', $validated['provider'])->first();
+            if ($provider) {
+                $message->update(['provider_id' => $provider->id]);
+            }
+        }
+
+        // Dispatch the SMS job
+        \App\Jobs\SendSmsJob::dispatch($message->id);
+
+        return response()->json([
+            'data' => $message->fresh(),
+            'message' => 'Message queued for sending'
+        ], 201);
     }
 
     /**
@@ -144,7 +184,13 @@ class MessageController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $message = \App\Models\Message::find($id);
+        
+        if (!$message) {
+            return response()->json(['message' => 'Message not found'], 404);
+        }
+        
+        return response()->json(['data' => $message]);
     }
 
     /**
