@@ -53,8 +53,9 @@ class AuthController extends Controller
      */
     public function getToken(Request $request)
     {
-        return app()->make('oauth2-server.builder')
-            ->getAccessTokenResponse();
+        // Let Passport handle the token request
+        return app(\Laravel\Passport\Http\Controllers\AccessTokenController::class)
+            ->issueToken($request);
     }
 
     /**
@@ -99,8 +100,9 @@ class AuthController extends Controller
      */
     public function refreshToken(Request $request)
     {
-        return app()->make('oauth2-server.builder')
-            ->getAccessTokenResponse();
+        // Let Passport handle the refresh token request
+        return app(\Laravel\Passport\Http\Controllers\AccessTokenController::class)
+            ->issueToken($request);
     }
 
     /**

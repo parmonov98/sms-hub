@@ -21,8 +21,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// OAuth2 Authentication routes
-Route::post('/oauth/token', [AuthController::class, 'getToken']);
+// OAuth2 Authentication routes (handled by Passport)
+// Route::post('/oauth/token', [AuthController::class, 'getToken']); // Use Passport's default route
 Route::post('/v1/auth/refresh', [AuthController::class, 'refreshToken']);
 
 // Protected API routes
