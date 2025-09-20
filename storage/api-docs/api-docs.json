@@ -1,0 +1,1715 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "SMS Hub API",
+        "description": "SMS Hub API Documentation - A comprehensive SMS gateway service with multiple provider support",
+        "contact": {
+            "name": "SMS Hub Support",
+            "email": "support@smshub.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Development Server"
+        }
+    ],
+    "paths": {
+        "/api/v1/messages": {
+            "get": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Get list of SMS messages",
+                "description": "Retrieve a paginated list of SMS messages for the authenticated user",
+                "operationId": "getMessages",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by message status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "sent",
+                                "delivered",
+                                "failed"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Message"
+                                            }
+                                        },
+                                        "links": {
+                                            "$ref": "#/components/schemas/PaginationLinks"
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Send SMS message",
+                "description": "Send a new SMS message through the SMS Hub",
+                "operationId": "sendMessage",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "to",
+                                    "message"
+                                ],
+                                "properties": {
+                                    "to": {
+                                        "description": "Recipient phone number",
+                                        "type": "string",
+                                        "example": "+998901234567"
+                                    },
+                                    "message": {
+                                        "description": "SMS message content",
+                                        "type": "string",
+                                        "example": "Hello, this is a test message!"
+                                    },
+                                    "provider": {
+                                        "description": "SMS provider to use",
+                                        "type": "string",
+                                        "example": "eskiz"
+                                    },
+                                    "sender_id": {
+                                        "description": "Sender ID",
+                                        "type": "string",
+                                        "example": "SMSHub"
+                                    },
+                                    "callback_url": {
+                                        "description": "Webhook URL for delivery reports",
+                                        "type": "string",
+                                        "example": "https://example.com/webhook"
+                                    },
+                                    "priority": {
+                                        "description": "Message priority (1-5)",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Message sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Message"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message sent successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/messages/{id}": {
+            "get": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Get message details",
+                "description": "Retrieve detailed information about a specific SMS message",
+                "operationId": "getMessage",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Message ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Message not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Update message",
+                "description": "Update an existing SMS message (only if not sent)",
+                "operationId": "updateMessage",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Message ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "message": {
+                                        "description": "Updated SMS message content",
+                                        "type": "string"
+                                    },
+                                    "priority": {
+                                        "description": "Updated message priority (1-5)",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Message updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Message"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message updated successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - message already sent",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Message not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Messages"
+                ],
+                "summary": "Delete message",
+                "description": "Delete an SMS message (only if not sent)",
+                "operationId": "deleteMessage",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Message ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - message already sent",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Message not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/providers": {
+            "get": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Get list of SMS providers",
+                "description": "Retrieve a list of available SMS providers",
+                "operationId": "getProviders",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Provider"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Create new SMS provider",
+                "description": "Create a new SMS provider configuration",
+                "operationId": "createProvider",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "type",
+                                    "credentials"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Provider name",
+                                        "type": "string",
+                                        "example": "Eskiz"
+                                    },
+                                    "type": {
+                                        "description": "Provider type",
+                                        "type": "string",
+                                        "example": "eskiz"
+                                    },
+                                    "description": {
+                                        "description": "Provider description",
+                                        "type": "string",
+                                        "example": "Eskiz SMS provider for Uzbekistan"
+                                    },
+                                    "credentials": {
+                                        "description": "Provider credentials",
+                                        "type": "object",
+                                        "example": {
+                                            "api_key": "your_api_key",
+                                            "sender_id": "SMSHub"
+                                        }
+                                    },
+                                    "is_active": {
+                                        "description": "Provider status",
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "priority": {
+                                        "description": "Provider priority",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Provider created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Provider"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Provider created successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/providers/{id}": {
+            "get": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Get provider details",
+                "description": "Retrieve detailed information about a specific SMS provider",
+                "operationId": "getProvider",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Provider ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Provider"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Provider not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Update provider",
+                "description": "Update an existing SMS provider configuration",
+                "operationId": "updateProvider",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Provider ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "Provider name",
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "description": "Provider description",
+                                        "type": "string"
+                                    },
+                                    "credentials": {
+                                        "description": "Provider credentials",
+                                        "type": "object"
+                                    },
+                                    "is_active": {
+                                        "description": "Provider status",
+                                        "type": "boolean"
+                                    },
+                                    "priority": {
+                                        "description": "Provider priority",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Provider updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Provider"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Provider updated successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Provider not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Delete provider",
+                "description": "Delete an SMS provider configuration",
+                "operationId": "deleteProvider",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Provider ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Provider deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Provider deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Provider not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/usage": {
+            "get": {
+                "tags": [
+                    "Usage"
+                ],
+                "summary": "Get usage statistics",
+                "description": "Retrieve SMS usage statistics for the authenticated user",
+                "operationId": "getUsage",
+                "parameters": [
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Time period for statistics",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "month",
+                            "enum": [
+                                "today",
+                                "week",
+                                "month",
+                                "year"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "provider",
+                        "in": "query",
+                        "description": "Filter by provider",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UsageStats"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/usage/daily": {
+            "get": {
+                "tags": [
+                    "Usage"
+                ],
+                "summary": "Get daily usage statistics",
+                "description": "Retrieve daily SMS usage statistics",
+                "operationId": "getDailyUsage",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Start date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "End date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/DailyUsage"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/usage/summary": {
+            "get": {
+                "tags": [
+                    "Usage"
+                ],
+                "summary": "Get usage summary",
+                "description": "Retrieve a summary of SMS usage statistics",
+                "operationId": "getUsageSummary",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UsageSummary"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/webhooks/{provider}/dlr": {
+            "post": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Delivery report webhook",
+                "description": "Receive delivery reports from SMS providers",
+                "operationId": "deliveryReport",
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "description": "SMS provider name",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "eskiz",
+                                "playmobile"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "message_id",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "message_id": {
+                                        "description": "Message ID",
+                                        "type": "string",
+                                        "example": "12345"
+                                    },
+                                    "status": {
+                                        "description": "Delivery status",
+                                        "type": "string",
+                                        "example": "delivered"
+                                    },
+                                    "error_code": {
+                                        "description": "Error code if failed",
+                                        "type": "string",
+                                        "example": ""
+                                    },
+                                    "error_message": {
+                                        "description": "Error message if failed",
+                                        "type": "string",
+                                        "example": ""
+                                    },
+                                    "delivered_at": {
+                                        "description": "Delivery timestamp",
+                                        "type": "string",
+                                        "format": "datetime",
+                                        "example": "2024-01-15T10:30:00Z"
+                                    },
+                                    "cost": {
+                                        "description": "Message cost",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 0.05
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Webhook processed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Delivery report processed"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid webhook data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Message not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks/{provider}/status": {
+            "post": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Status update webhook",
+                "description": "Receive status updates from SMS providers",
+                "operationId": "statusUpdate",
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "description": "SMS provider name",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "eskiz",
+                                "playmobile"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "message_id",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "message_id": {
+                                        "description": "Message ID",
+                                        "type": "string",
+                                        "example": "12345"
+                                    },
+                                    "status": {
+                                        "description": "Message status",
+                                        "type": "string",
+                                        "example": "sent"
+                                    },
+                                    "provider_message_id": {
+                                        "description": "Provider's message ID",
+                                        "type": "string",
+                                        "example": "provider_12345"
+                                    },
+                                    "updated_at": {
+                                        "description": "Status update timestamp",
+                                        "type": "string",
+                                        "format": "datetime",
+                                        "example": "2024-01-15T10:30:00Z"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status update processed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Status update processed"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid webhook data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Message": {
+                "title": "SMS Message",
+                "description": "SMS message object",
+                "properties": {
+                    "id": {
+                        "description": "Message ID",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "to": {
+                        "description": "Recipient phone number",
+                        "type": "string",
+                        "example": "+998901234567"
+                    },
+                    "message": {
+                        "description": "SMS message content",
+                        "type": "string",
+                        "example": "Hello, this is a test message!"
+                    },
+                    "provider": {
+                        "description": "SMS provider used",
+                        "type": "string",
+                        "example": "eskiz"
+                    },
+                    "sender_id": {
+                        "description": "Sender ID",
+                        "type": "string",
+                        "example": "SMSHub"
+                    },
+                    "status": {
+                        "description": "Message status",
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "sent",
+                            "delivered",
+                            "failed"
+                        ],
+                        "example": "sent"
+                    },
+                    "priority": {
+                        "description": "Message priority (1-5)",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "cost": {
+                        "description": "Message cost",
+                        "type": "number",
+                        "format": "float",
+                        "example": 0.05
+                    },
+                    "provider_message_id": {
+                        "description": "Provider's message ID",
+                        "type": "string",
+                        "example": "provider_12345"
+                    },
+                    "callback_url": {
+                        "description": "Webhook URL for delivery reports",
+                        "type": "string",
+                        "example": "https://example.com/webhook"
+                    },
+                    "sent_at": {
+                        "description": "Sent timestamp",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-01-15T10:30:00Z"
+                    },
+                    "delivered_at": {
+                        "description": "Delivery timestamp",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-01-15T10:35:00Z"
+                    },
+                    "created_at": {
+                        "description": "Creation timestamp",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-01-15T10:30:00Z"
+                    },
+                    "updated_at": {
+                        "description": "Last update timestamp",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-01-15T10:35:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Provider": {
+                "title": "SMS Provider",
+                "description": "SMS provider configuration",
+                "properties": {
+                    "id": {
+                        "description": "Provider ID",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "name": {
+                        "description": "Provider name",
+                        "type": "string",
+                        "example": "Eskiz"
+                    },
+                    "type": {
+                        "description": "Provider type",
+                        "type": "string",
+                        "example": "eskiz"
+                    },
+                    "description": {
+                        "description": "Provider description",
+                        "type": "string",
+                        "example": "Eskiz SMS provider for Uzbekistan"
+                    },
+                    "is_active": {
+                        "description": "Provider status",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "priority": {
+                        "description": "Provider priority",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "capabilities": {
+                        "description": "Provider capabilities",
+                        "type": "object",
+                        "example": {
+                            "dlr": true,
+                            "unicode": true,
+                            "concatenation": true
+                        }
+                    },
+                    "created_at": {
+                        "description": "Creation timestamp",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-01-15T10:30:00Z"
+                    },
+                    "updated_at": {
+                        "description": "Last update timestamp",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-01-15T10:30:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "UsageStats": {
+                "title": "Usage Statistics",
+                "description": "SMS usage statistics",
+                "properties": {
+                    "period": {
+                        "description": "Statistics period",
+                        "type": "string",
+                        "example": "month"
+                    },
+                    "total_messages": {
+                        "description": "Total messages sent",
+                        "type": "integer",
+                        "example": 1500
+                    },
+                    "successful_messages": {
+                        "description": "Successfully sent messages",
+                        "type": "integer",
+                        "example": 1450
+                    },
+                    "failed_messages": {
+                        "description": "Failed messages",
+                        "type": "integer",
+                        "example": 50
+                    },
+                    "delivered_messages": {
+                        "description": "Delivered messages",
+                        "type": "integer",
+                        "example": 1400
+                    },
+                    "total_cost": {
+                        "description": "Total cost",
+                        "type": "number",
+                        "format": "float",
+                        "example": 75.5
+                    },
+                    "average_cost": {
+                        "description": "Average cost per message",
+                        "type": "number",
+                        "format": "float",
+                        "example": 0.05
+                    },
+                    "by_provider": {
+                        "description": "Usage by provider",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProviderUsage"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ProviderUsage": {
+                "title": "Provider Usage",
+                "description": "Usage statistics for a specific provider",
+                "properties": {
+                    "provider": {
+                        "description": "Provider name",
+                        "type": "string",
+                        "example": "eskiz"
+                    },
+                    "messages": {
+                        "description": "Messages sent",
+                        "type": "integer",
+                        "example": 800
+                    },
+                    "cost": {
+                        "description": "Total cost",
+                        "type": "number",
+                        "format": "float",
+                        "example": 40
+                    },
+                    "success_rate": {
+                        "description": "Success rate percentage",
+                        "type": "number",
+                        "format": "float",
+                        "example": 96.5
+                    }
+                },
+                "type": "object"
+            },
+            "DailyUsage": {
+                "title": "Daily Usage",
+                "description": "Daily usage statistics",
+                "properties": {
+                    "date": {
+                        "description": "Date",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-01-15"
+                    },
+                    "messages": {
+                        "description": "Messages sent",
+                        "type": "integer",
+                        "example": 50
+                    },
+                    "cost": {
+                        "description": "Daily cost",
+                        "type": "number",
+                        "format": "float",
+                        "example": 2.5
+                    },
+                    "success_rate": {
+                        "description": "Success rate percentage",
+                        "type": "number",
+                        "format": "float",
+                        "example": 98
+                    }
+                },
+                "type": "object"
+            },
+            "UsageSummary": {
+                "title": "Usage Summary",
+                "description": "Summary of SMS usage",
+                "properties": {
+                    "total_messages": {
+                        "description": "Total messages sent",
+                        "type": "integer",
+                        "example": 15000
+                    },
+                    "total_cost": {
+                        "description": "Total cost",
+                        "type": "number",
+                        "format": "float",
+                        "example": 750
+                    },
+                    "active_providers": {
+                        "description": "Number of active providers",
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "last_30_days": {
+                        "$ref": "#/components/schemas/UsageStats"
+                    },
+                    "top_providers": {
+                        "description": "Top providers by usage",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProviderUsage"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ErrorResponse": {
+                "title": "Error Response",
+                "description": "Standard error response",
+                "properties": {
+                    "error": {
+                        "description": "Error type",
+                        "type": "string",
+                        "example": "Unauthorized"
+                    },
+                    "message": {
+                        "description": "Error message",
+                        "type": "string",
+                        "example": "Invalid or missing authentication token"
+                    },
+                    "code": {
+                        "description": "HTTP status code",
+                        "type": "integer",
+                        "example": 401
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationErrorResponse": {
+                "title": "Validation Error Response",
+                "description": "Validation error response",
+                "properties": {
+                    "message": {
+                        "description": "Error message",
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "description": "Validation errors",
+                        "type": "object",
+                        "example": {
+                            "to": "The to field is required.",
+                            "message": "The message field is required."
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "PaginationLinks": {
+                "title": "Pagination Links",
+                "description": "Pagination links",
+                "properties": {
+                    "first": {
+                        "description": "First page URL",
+                        "type": "string",
+                        "example": "http://localhost:8000/api/v1/messages?page=1"
+                    },
+                    "last": {
+                        "description": "Last page URL",
+                        "type": "string",
+                        "example": "http://localhost:8000/api/v1/messages?page=10"
+                    },
+                    "prev": {
+                        "description": "Previous page URL",
+                        "type": "string",
+                        "example": "http://localhost:8000/api/v1/messages?page=2",
+                        "nullable": true
+                    },
+                    "next": {
+                        "description": "Next page URL",
+                        "type": "string",
+                        "example": "http://localhost:8000/api/v1/messages?page=4",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PaginationMeta": {
+                "title": "Pagination Meta",
+                "description": "Pagination metadata",
+                "properties": {
+                    "current_page": {
+                        "description": "Current page number",
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "from": {
+                        "description": "First item number on current page",
+                        "type": "integer",
+                        "example": 31
+                    },
+                    "last_page": {
+                        "description": "Last page number",
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "per_page": {
+                        "description": "Items per page",
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "to": {
+                        "description": "Last item number on current page",
+                        "type": "integer",
+                        "example": 45
+                    },
+                    "total": {
+                        "description": "Total number of items",
+                        "type": "integer",
+                        "example": 150
+                    }
+                },
+                "type": "object"
+            },
+            "TokenResponse": {
+                "title": "Token Response",
+                "description": "OAuth2 token response",
+                "properties": {
+                    "token_type": {
+                        "description": "Token type",
+                        "type": "string",
+                        "example": "Bearer"
+                    },
+                    "expires_in": {
+                        "description": "Token expiration in seconds",
+                        "type": "integer",
+                        "example": 31536000
+                    },
+                    "access_token": {
+                        "description": "Access token",
+                        "type": "string",
+                        "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9..."
+                    },
+                    "refresh_token": {
+                        "description": "Refresh token",
+                        "type": "string",
+                        "example": "def50200..."
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Enter your JWT token",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            },
+            "passport": {
+                "type": "oauth2",
+                "description": "Laravel passport oauth2 security.",
+                "flows": {
+                    "clientCredentials": {
+                        "tokenUrl": "http://localhost:8000/oauth/token",
+                        "scopes": {
+                            "read": "Read access",
+                            "write": "Write access",
+                            "admin": "Admin access"
+                        }
+                    },
+                    "password": {
+                        "tokenUrl": "http://localhost:8000/oauth/token",
+                        "scopes": {
+                            "read": "Read access",
+                            "write": "Write access",
+                            "admin": "Admin access"
+                        }
+                    }
+                }
+            },
+            "bearer": {
+                "type": "http",
+                "description": "Enter token in format (Bearer <token>)",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Providers",
+            "description": "SMS provider management"
+        },
+        {
+            "name": "Messages",
+            "description": "SMS message operations"
+        },
+        {
+            "name": "Usage",
+            "description": "Usage statistics and monitoring"
+        },
+        {
+            "name": "Webhooks",
+            "description": "Webhook endpoints for delivery reports"
+        }
+    ],
+    "security": [
+        {
+            "bearer": []
+        }
+    ]
+}

@@ -22,7 +22,7 @@ class AggregateUsageJob implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        private string $date = null
+        private ?string $date = null
     ) {
         $this->date = $date ?? now()->format('Y-m-d');
     }
