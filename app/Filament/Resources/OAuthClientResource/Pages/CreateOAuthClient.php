@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
 class CreateOAuthClient extends CreateRecord
 {
     protected static string $resource = OAuthClientResource::class;
+    
+    protected $originalSecret;
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
@@ -21,6 +23,9 @@ class CreateOAuthClient extends CreateRecord
         
         // Generate a random client secret
         $data['secret'] = Str::random(40);
+        
+        // Store the original secret for the notification (before hashing)
+        $this->originalSecret = $data['secret'];
         
         // Set default values
         $data['owner_type'] = 'App\\Models\\User';
@@ -52,18 +57,19 @@ class CreateOAuthClient extends CreateRecord
     protected function getCreatedNotification(): ?Notification
     {
         $client = $this->record;
+        $originalSecret = $this->originalSecret ?? $client->secret;
         
         return Notification::make()
             ->title('OAuth Client Created Successfully')
-            ->body("Client ID: {$client->id}\nClient Secret: {$client->secret}")
+            ->body("Client ID: {$client->id}\nClient Secret: {$originalSecret}")
             ->success()
             ->persistent()
             ->actions([
                 NotificationAction::make('copy_secret')
                     ->label('Copy Secret')
-                    ->action(function () use ($client) {
+                    ->action(function () use ($originalSecret) {
                         // This will copy the secret to clipboard via JavaScript
-                        $this->js("navigator.clipboard.writeText('{$client->secret}')");
+                        $this->js("navigator.clipboard.writeText('{$originalSecret}')");
                         Notification::make()
                             ->title('Client Secret Copied!')
                             ->success()

@@ -14,3 +14,10 @@ Schedule::command('sms:refresh-provider-tokens')
     ->withoutOverlapping()
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/scheduler.log'));
+
+// Schedule SMS delivery status check every 5 minutes
+Schedule::command('sms:check-delivery --limit=100')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/scheduler.log'));

@@ -31,7 +31,7 @@ class EskizProvider implements SmsProviderInterface
                 'mobile_phone' => $to,
                 'message' => $text,
                 'from' => $from,
-                'callback_url' => $options['callback_url'] ?? null,
+                'callback_url' => $options['callback_url'] ?? url('/api/v1/sms/delivery-callback'),
             ]);
 
             if ($response->successful()) {
@@ -100,12 +100,13 @@ class EskizProvider implements SmsProviderInterface
 
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->token,
-            ])->get($this->baseUrl . '/message/sms/status/' . $messageId);
+            ])->get($this->baseUrl . '/message/sms/status_by_id/' . $messageId);
 
             if ($response->successful()) {
                 $data = $response->json();
+                $status = $data['data']['status'] ?? $data['status'] ?? 'unknown';
                 return [
-                    'status' => $this->mapStatus($data['status'] ?? 'unknown'),
+                    'status' => $this->mapStatus($status),
                     'provider_response' => $data,
                 ];
             }
@@ -151,12 +152,15 @@ class EskizProvider implements SmsProviderInterface
 
     private function mapStatus(string $eskizStatus): string
     {
-        return match ($eskizStatus) {
+        return match (strtoupper($eskizStatus)) {
             'ACCEPTED' => 'sent',
             'DELIVERED' => 'delivered',
             'FAILED' => 'failed',
             'REJECTED' => 'failed',
-            default => 'queued',
+            'EXPIRED' => 'failed',
+            'PENDING' => 'queued',
+            'SENT' => 'sent',
+            default => 'unknown',
         };
     }
 }

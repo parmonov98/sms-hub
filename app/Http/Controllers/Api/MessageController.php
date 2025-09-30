@@ -125,7 +125,7 @@ class MessageController extends Controller
         // Create the message record (no project needed in new system)
         $message = \App\Models\Message::create([
             'to' => $validated['to'],
-            'from' => $validated['sender_id'] ?? 'SMSHub',
+            'from' => $validated['sender_id'] ?? '4546', // Use approved Eskiz sender ID
             'text' => $validated['message'],
             'status' => 'queued',
             'idempotency_key' => uniqid('msg_', true),

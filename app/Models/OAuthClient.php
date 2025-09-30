@@ -30,6 +30,19 @@ class OAuthClient extends Model
         'grant_types' => 'array',
     ];
 
+    /**
+     * Automatically hash the secret when it's set
+     */
+    public function setSecretAttribute($value)
+    {
+        // Only hash if the value is not already hashed (doesn't start with $2y$)
+        if ($value && !str_starts_with($value, '$2y$')) {
+            $this->attributes['secret'] = bcrypt($value);
+        } else {
+            $this->attributes['secret'] = $value;
+        }
+    }
+
     protected $hidden = [
         'secret',
     ];

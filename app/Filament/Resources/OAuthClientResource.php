@@ -50,7 +50,7 @@ class OAuthClientResource extends Resource
                             ->label('Client Secret')
                             ->disabled()
                             ->dehydrated(true)
-                            ->helperText('This will be generated automatically when creating a new client'),
+                            ->helperText('This will be generated automatically when creating a new client. The secret is automatically hashed for security.'),
                     ])->columns(2),
                 
                 Forms\Components\Section::make('Client Configuration')
