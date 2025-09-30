@@ -58,7 +58,8 @@ class OAuthClientResource extends Resource
                         Forms\Components\TextInput::make('redirect_uris')
                             ->label('Redirect URIs')
                             ->placeholder('https://example.com/callback')
-                            ->helperText('Comma-separated list of redirect URIs'),
+                            ->helperText('Comma-separated list of redirect URIs (optional)')
+                            ->nullable(),
                         
                         Forms\Components\CheckboxList::make('grant_types')
                             ->label('Grant Types')

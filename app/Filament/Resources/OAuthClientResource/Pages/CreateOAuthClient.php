@@ -6,6 +6,7 @@ use App\Filament\Resources\OAuthClientResource;
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Filament\Notifications\Actions\Action as NotificationAction;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Str;
 
@@ -58,7 +59,7 @@ class CreateOAuthClient extends CreateRecord
             ->success()
             ->persistent()
             ->actions([
-                Action::make('copy_secret')
+                NotificationAction::make('copy_secret')
                     ->label('Copy Secret')
                     ->action(function () use ($client) {
                         // This will copy the secret to clipboard via JavaScript

@@ -67,7 +67,7 @@ class OAuthClient extends Model
 
     public function getRedirectAttribute()
     {
-        return $this->redirect_uris[0] ?? null;
+        return $this->redirect_uris ? ($this->redirect_uris[0] ?? null) : null;
     }
 
     public function getUserIdAttribute()
