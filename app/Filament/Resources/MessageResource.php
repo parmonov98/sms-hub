@@ -90,7 +90,7 @@ class MessageResource extends Resource
                         Forms\Components\TextInput::make('currency')
                             ->label('Currency')
                             ->maxLength(3)
-                            ->default('USD'),
+                            ->default('UZS'),
                     ])->columns(2)
                     ->collapsible(),
             ]);
@@ -150,7 +150,11 @@ class MessageResource extends Resource
                 
                 Tables\Columns\TextColumn::make('price_decimal')
                     ->label('Price')
-                    ->money('USD')
+                    ->formatStateUsing(function ($state, $record) {
+                        if (!$state) return 'N/A';
+                        $currency = $record->currency ?? 'UZS';
+                        return number_format($state, 2) . ' ' . $currency;
+                    })
                     ->sortable()
                     ->toggleable(),
                 

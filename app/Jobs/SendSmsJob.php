@@ -55,7 +55,7 @@ class SendSmsJob implements ShouldQueue
             'error_code' => $result['error'] ?? null,
             'error_message' => $result['error'] ?? null,
             'price_decimal' => $result['cost'] ?? null,
-            'currency' => $result['currency'] ?? 'USD',
+            'currency' => $result['currency'] ?? 'UZS',
         ]);
 
         if ($result['status'] === 'sent' && isset($result['provider_id'])) {
