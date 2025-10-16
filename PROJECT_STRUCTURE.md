@@ -105,9 +105,6 @@ sms-hub/
 - `GET /v1/messages/{id}` - Get message status
 - `GET /v1/usage` - Get usage summary
 
-#### Webhook Endpoints
-- `POST /v1/webhooks/{provider}/dlr` - Delivery report callback
-
 ### 5. Security Features
 
 #### Authentication & Authorization

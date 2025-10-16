@@ -25,7 +25,7 @@ Support CRUD for providers and per-project credential management.
 
 Track usage and pricing for reporting and billing.
 
-Support delivery status updates via webhooks and/or polling.
+Support delivery status updates via polling.
 
 Non-Goals
 
@@ -80,9 +80,7 @@ Failover logic if provider fails (try next active by priority).
 
 3.5 Delivery Status
 
-Providers push DLRs (Delivery Reports) via webhook → update message status.
-
-If no webhook available, hub periodically polls provider.
+Hub periodically polls provider for delivery status updates.
 
 Status values: queued, sent, delivered, failed.
 
@@ -109,8 +107,6 @@ Activity logs: who created/updated/deleted provider/credentials.
 3.8 Security
 
 Encrypted storage for credentials.
-
-Webhook signature verification for providers.
 
 HMAC request signing for projects.
 
@@ -153,10 +149,6 @@ Usage
 
 GET /v1/usage?from=2025-08-01&to=2025-08-31 → project usage summary
 
-Webhooks
-
-POST /v1/webhooks/{provider}/dlr → delivery report callback
-
 5. Data Model
 Tables
 
@@ -194,7 +186,7 @@ Client App:
 
 “I want to send SMS with a simple API call.”
 
-“I want to receive delivery updates via webhook.”
+"I want to check delivery status via API."
 
 7. Non-Functional Requirements
 
@@ -204,7 +196,7 @@ Scalability: Providers added without downtime.
 
 Reliability: Retry failed sends with backoff; failover to next provider.
 
-Security: OAuth2, encrypted secrets, HMAC, webhook validation.
+Security: OAuth2, encrypted secrets, HMAC.
 
 Observability: Audit logs, request tracing, error monitoring.
 
@@ -216,4 +208,4 @@ Should failover logic be global policy or configurable per project?
 
 Do we integrate tariff tables for price calculation, or rely only on provider’s pricing API?
 
-✅ This PRD is structured enough for a Cursor AI agent to implement step by step: migrations, models, controllers, jobs, provider drivers, webhooks, and admin CRUD.
+✅ This PRD is structured enough for a Cursor AI agent to implement step by step: migrations, models, controllers, jobs, provider drivers, and admin CRUD.
