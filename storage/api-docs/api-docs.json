@@ -2,9 +2,10 @@
     "openapi": "3.0.0",
     "info": {
         "title": "SMS Hub API",
-        "description": "SMS Hub API Documentation - A comprehensive SMS gateway service with multiple provider support",
+        "description": "A comprehensive SMS gateway service that provides a unified API for sending SMS messages through multiple providers. Perfect for developers who need reliable SMS delivery with failover support and detailed usage tracking.",
         "contact": {
-            "name": "SMS Hub Support",
+            "name": "SMS Hub Support Team",
+            "url": "https://smshub.com/support",
             "email": "support@smshub.com"
         },
         "license": {
@@ -14,6 +15,14 @@
         "version": "1.0.0"
     },
     "servers": [
+        {
+            "url": "https://api.smshub.com",
+            "description": "Production Server"
+        },
+        {
+            "url": "https://staging-api.smshub.com",
+            "description": "Staging Server"
+        },
         {
             "url": "http://localhost:8000",
             "description": "Development Server"
@@ -26,9 +35,10 @@
                     "Authentication"
                 ],
                 "summary": "Get OAuth2 access token",
-                "description": "Obtain an access token using OAuth2 client credentials or password grant",
+                "description": "Obtain an access token using OAuth2 authentication. This endpoint supports both client credentials grant (for server-to-server communication) and password grant (for user authentication). The access token is required for all subsequent API calls.",
                 "operationId": "getToken",
                 "requestBody": {
+                    "description": "OAuth2 token request parameters",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -40,7 +50,7 @@
                                 ],
                                 "properties": {
                                     "grant_type": {
-                                        "description": "OAuth2 grant type",
+                                        "description": "OAuth2 grant type - use 'client_credentials' for server-to-server, 'password' for user authentication",
                                         "type": "string",
                                         "enum": [
                                             "client_credentials",
@@ -49,27 +59,27 @@
                                         "example": "client_credentials"
                                     },
                                     "client_id": {
-                                        "description": "OAuth2 client ID",
+                                        "description": "Your OAuth2 client ID (obtained from the admin panel)",
                                         "type": "string",
                                         "example": "01996688-68b6-73da-b265-98d48d707a69"
                                     },
                                     "client_secret": {
-                                        "description": "OAuth2 client secret",
+                                        "description": "Your OAuth2 client secret (keep this secure)",
                                         "type": "string",
                                         "example": "your-client-secret"
                                     },
                                     "username": {
-                                        "description": "Username (for password grant)",
+                                        "description": "Username (required for password grant only)",
                                         "type": "string",
                                         "example": "user@example.com"
                                     },
                                     "password": {
-                                        "description": "Password (for password grant)",
+                                        "description": "Password (required for password grant only)",
                                         "type": "string",
                                         "example": "password"
                                     },
                                     "scope": {
-                                        "description": "Requested scopes",
+                                        "description": "Requested scopes (space-separated: read, write, admin)",
                                         "type": "string",
                                         "example": "read write"
                                     }
@@ -81,7 +91,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Token obtained successfully",
+                        "description": "Access token obtained successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -91,7 +101,7 @@
                         }
                     },
                     "400": {
-                        "description": "Bad request - invalid grant type or credentials",
+                        "description": "Bad request - Invalid grant type, missing parameters, or malformed request",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -115,7 +125,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized - invalid client credentials",
+                        "description": "Unauthorized - Invalid client credentials or user credentials",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -127,6 +137,30 @@
                                         "error_description": {
                                             "type": "string",
                                             "example": "Client authentication failed"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded - Too many authentication attempts",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "rate_limit_exceeded"
+                                        },
+                                        "error_description": {
+                                            "type": "string",
+                                            "example": "Too many authentication attempts"
+                                        },
+                                        "retry_after": {
+                                            "type": "integer",
+                                            "example": 60
                                         }
                                     },
                                     "type": "object"
@@ -282,49 +316,75 @@
                 "tags": [
                     "Messages"
                 ],
-                "summary": "Get list of SMS messages",
-                "description": "Retrieve a paginated list of SMS messages for the authenticated user",
+                "summary": "List SMS messages",
+                "description": "Retrieve a paginated list of SMS messages sent by your application. Use this endpoint to track message history, check delivery status, and monitor your SMS usage. You can filter by status and paginate through results.",
                 "operationId": "getMessages",
                 "parameters": [
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Page number for pagination",
+                        "description": "Page number for pagination (starts from 1)",
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "default": 1
+                            "default": 1,
+                            "minimum": 1
                         }
                     },
                     {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Number of items per page",
+                        "description": "Number of items per page (max 100)",
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "default": 15
+                            "default": 15,
+                            "maximum": 100,
+                            "minimum": 1
                         }
                     },
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filter by message status",
+                        "description": "Filter messages by delivery status",
                         "required": false,
                         "schema": {
                             "type": "string",
                             "enum": [
-                                "pending",
+                                "queued",
                                 "sent",
                                 "delivered",
                                 "failed"
-                            ]
+                            ],
+                            "example": "delivered"
+                        }
+                    },
+                    {
+                        "name": "from_date",
+                        "in": "query",
+                        "description": "Filter messages from this date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-01-01"
+                        }
+                    },
+                    {
+                        "name": "to_date",
+                        "in": "query",
+                        "description": "Filter messages until this date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-01-31"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful operation",
+                        "description": "Messages retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -348,11 +408,21 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - Invalid or missing access token",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error - Invalid query parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
                                 }
                             }
                         }
@@ -369,9 +439,10 @@
                     "Messages"
                 ],
                 "summary": "Send SMS message",
-                "description": "Send a new SMS message through the SMS Hub",
+                "description": "Send a new SMS message through the SMS Hub. The message will be queued for delivery and processed by the most suitable provider based on availability and priority. You can specify a preferred provider or let the system choose automatically.",
                 "operationId": "sendMessage",
                 "requestBody": {
+                    "description": "SMS message details",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -382,33 +453,34 @@
                                 ],
                                 "properties": {
                                     "to": {
-                                        "description": "Recipient phone number",
+                                        "description": "Recipient phone number in international format (E.164)",
                                         "type": "string",
+                                        "pattern": "^\\+[1-9]\\d{1,14}$",
                                         "example": "+998901234567"
                                     },
                                     "message": {
-                                        "description": "SMS message content",
+                                        "description": "SMS message content (max 1600 characters for Unicode, 160 for ASCII)",
                                         "type": "string",
-                                        "example": "Hello, this is a test message!"
+                                        "maxLength": 1600,
+                                        "example": "Hello! Your verification code is 123456. Valid for 5 minutes."
                                     },
                                     "provider": {
-                                        "description": "SMS provider to use",
+                                        "description": "Preferred SMS provider (optional - system will choose if not specified)",
                                         "type": "string",
                                         "example": "eskiz"
                                     },
                                     "sender_id": {
-                                        "description": "Sender ID",
+                                        "description": "Sender ID (max 11 characters, alphanumeric only)",
                                         "type": "string",
+                                        "maxLength": 11,
+                                        "pattern": "^[a-zA-Z0-9]+$",
                                         "example": "SMSHub"
                                     },
-                                    "callback_url": {
-                                        "description": "Webhook URL for delivery reports",
-                                        "type": "string",
-                                        "example": "https://example.com/webhook"
-                                    },
                                     "priority": {
-                                        "description": "Message priority (1-5)",
+                                        "description": "Message priority (1=highest, 5=lowest, default=3)",
                                         "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1,
                                         "example": 1
                                     }
                                 },
@@ -419,7 +491,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Message sent successfully",
+                        "description": "Message queued for sending successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -429,7 +501,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Message sent successfully"
+                                            "example": "Message queued for sending"
                                         }
                                     },
                                     "type": "object"
@@ -438,7 +510,7 @@
                         }
                     },
                     "400": {
-                        "description": "Bad request - validation error",
+                        "description": "Bad request - Invalid phone number format or message content",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -448,7 +520,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - Invalid or missing access token",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -458,11 +530,35 @@
                         }
                     },
                     "422": {
-                        "description": "Unprocessable entity",
+                        "description": "Validation error - Required fields missing or invalid format",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded - Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Rate limit exceeded"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Too many requests. Please try again later."
+                                        },
+                                        "retry_after": {
+                                            "type": "integer",
+                                            "example": 60
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -481,23 +577,24 @@
                     "Messages"
                 ],
                 "summary": "Get message details",
-                "description": "Retrieve detailed information about a specific SMS message",
+                "description": "Retrieve detailed information about a specific SMS message including delivery status, cost, and provider information. Use this endpoint to check the current status of a message you've sent.",
                 "operationId": "getMessage",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Message ID",
+                        "description": "Unique message identifier (UUID)",
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "format": "uuid"
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful operation",
+                        "description": "Message details retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -512,7 +609,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - Invalid or missing access token",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -522,11 +619,25 @@
                         }
                     },
                     "404": {
-                        "description": "Message not found",
+                        "description": "Message not found - The specified message ID does not exist or you don't have access to it",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Not Found"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Message not found"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 404
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -544,12 +655,12 @@
                 "tags": [
                     "Providers"
                 ],
-                "summary": "Get list of SMS providers",
-                "description": "Retrieve a list of available SMS providers",
+                "summary": "List available SMS providers",
+                "description": "Retrieve a list of all available SMS providers with their capabilities, status, and priority. This information helps you understand which providers are available for sending messages and their specific features like Unicode support, delivery reports, etc.",
                 "operationId": "getProviders",
                 "responses": {
                     "200": {
-                        "description": "Successful operation",
+                        "description": "Providers retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -567,7 +678,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - Invalid or missing access token",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -590,13 +701,13 @@
                     "Usage"
                 ],
                 "summary": "Get usage statistics",
-                "description": "Retrieve SMS usage statistics for the authenticated user",
+                "description": "Retrieve comprehensive SMS usage statistics for your account. This endpoint provides detailed insights into your SMS consumption, costs, and delivery performance across different time periods and providers.",
                 "operationId": "getUsage",
                 "parameters": [
                     {
                         "name": "period",
                         "in": "query",
-                        "description": "Time period for statistics",
+                        "description": "Time period for statistics aggregation",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -606,22 +717,46 @@
                                 "week",
                                 "month",
                                 "year"
-                            ]
+                            ],
+                            "example": "month"
                         }
                     },
                     {
                         "name": "provider",
                         "in": "query",
-                        "description": "Filter by provider",
+                        "description": "Filter statistics by specific provider",
                         "required": false,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "example": "eskiz"
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Custom start date for statistics (YYYY-MM-DD format)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-01-01"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "Custom end date for statistics (YYYY-MM-DD format)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-01-31"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful operation",
+                        "description": "Usage statistics retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -636,11 +771,21 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - Invalid or missing access token",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error - Invalid date format or parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
                                 }
                             }
                         }
@@ -765,79 +910,56 @@
     },
     "components": {
         "schemas": {
-            "Message": {
-                "title": "SMS Message",
-                "description": "SMS message object",
+            "TokenResponse": {
+                "title": "Token Response",
+                "description": "OAuth2 token response",
+                "properties": {
+                    "token_type": {
+                        "description": "Token type",
+                        "type": "string",
+                        "example": "Bearer"
+                    },
+                    "expires_in": {
+                        "description": "Token expiration time in seconds",
+                        "type": "integer",
+                        "example": 3600
+                    },
+                    "access_token": {
+                        "description": "Access token",
+                        "type": "string",
+                        "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9..."
+                    },
+                    "refresh_token": {
+                        "description": "Refresh token (for password grant)",
+                        "type": "string",
+                        "example": "def50200..."
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "title": "User",
+                "description": "User information",
                 "properties": {
                     "id": {
-                        "description": "Message ID",
-                        "type": "string",
-                        "format": "uuid",
-                        "example": "123e4567-e89b-12d3-a456-426614174000"
-                    },
-                    "to": {
-                        "description": "Recipient phone number",
-                        "type": "string",
-                        "example": "+998901234567"
-                    },
-                    "message": {
-                        "description": "SMS message content",
-                        "type": "string",
-                        "example": "Hello, this is a test message!"
-                    },
-                    "provider": {
-                        "description": "SMS provider used",
-                        "type": "string",
-                        "example": "eskiz"
-                    },
-                    "sender_id": {
-                        "description": "Sender ID",
-                        "type": "string",
-                        "example": "SMSHub"
-                    },
-                    "status": {
-                        "description": "Message status",
-                        "type": "string",
-                        "enum": [
-                            "pending",
-                            "sent",
-                            "delivered",
-                            "failed"
-                        ],
-                        "example": "sent"
-                    },
-                    "priority": {
-                        "description": "Message priority (1-5)",
+                        "description": "User ID",
                         "type": "integer",
                         "example": 1
                     },
-                    "cost": {
-                        "description": "Message cost",
-                        "type": "number",
-                        "format": "float",
-                        "example": 0.05
-                    },
-                    "provider_message_id": {
-                        "description": "Provider's message ID",
+                    "name": {
+                        "description": "User name",
                         "type": "string",
-                        "example": "provider_12345"
+                        "example": "John Doe"
                     },
-                    "callback_url": {
-                        "description": "Webhook URL for delivery reports",
+                    "email": {
+                        "description": "User email",
                         "type": "string",
-                        "example": "https://example.com/webhook"
+                        "example": "john@example.com"
                     },
-                    "sent_at": {
-                        "description": "Sent timestamp",
-                        "type": "string",
-                        "format": "datetime",
-                        "example": "2024-01-15T10:30:00Z"
-                    },
-                    "delivered_at": {
-                        "description": "Delivery timestamp",
-                        "type": "string",
-                        "format": "datetime",
-                        "example": "2024-01-15T10:35:00Z"
+                    "is_admin": {
+                        "description": "Admin status",
+                        "type": "boolean",
+                        "example": false
                     },
                     "created_at": {
                         "description": "Creation timestamp",
@@ -849,30 +971,96 @@
                         "description": "Last update timestamp",
                         "type": "string",
                         "format": "datetime",
-                        "example": "2024-01-15T10:35:00Z"
+                        "example": "2024-01-15T10:30:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Message": {
+                "title": "SMS Message",
+                "description": "SMS message object",
+                "properties": {
+                    "id": {
+                        "description": "Message ID",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "to": {
+                        "description": "Recipient phone number",
+                        "type": "string",
+                        "example": "+998901234567"
+                    },
+                    "from": {
+                        "description": "Sender ID",
+                        "type": "string",
+                        "example": "4546"
+                    },
+                    "text": {
+                        "description": "Message content",
+                        "type": "string",
+                        "example": "Hello, this is a test message!"
+                    },
+                    "status": {
+                        "description": "Message status",
+                        "type": "string",
+                        "enum": [
+                            "queued",
+                            "sent",
+                            "delivered",
+                            "failed"
+                        ],
+                        "example": "queued"
+                    },
+                    "provider_id": {
+                        "description": "Provider ID",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "cost": {
+                        "description": "Message cost",
+                        "type": "number",
+                        "format": "float",
+                        "example": 0.05
+                    },
+                    "parts": {
+                        "description": "Number of SMS parts",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "idempotency_key": {
+                        "description": "Idempotency key",
+                        "type": "string",
+                        "example": "msg_1234567890"
+                    },
+                    "created_at": {
+                        "description": "Creation timestamp",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-01-15T10:30:00Z"
+                    },
+                    "updated_at": {
+                        "description": "Last update timestamp",
+                        "type": "string",
+                        "format": "datetime",
+                        "example": "2024-01-15T10:30:00Z"
                     }
                 },
                 "type": "object"
             },
             "Provider": {
                 "title": "SMS Provider",
-                "description": "SMS provider configuration",
+                "description": "SMS provider information",
                 "properties": {
                     "id": {
                         "description": "Provider ID",
-                        "type": "string",
-                        "format": "uuid",
-                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                        "type": "integer",
+                        "example": 1
                     },
-                    "name": {
-                        "description": "Provider name",
+                    "display_name": {
+                        "description": "Provider display name",
                         "type": "string",
                         "example": "Eskiz"
-                    },
-                    "type": {
-                        "description": "Provider type",
-                        "type": "string",
-                        "example": "eskiz"
                     },
                     "description": {
                         "description": "Provider description",
@@ -917,85 +1105,56 @@
                 "title": "Usage Statistics",
                 "description": "SMS usage statistics",
                 "properties": {
-                    "period": {
-                        "description": "Statistics period",
-                        "type": "string",
-                        "example": "month"
-                    },
                     "total_messages": {
                         "description": "Total messages sent",
                         "type": "integer",
-                        "example": 1500
+                        "example": 1250
                     },
                     "successful_messages": {
-                        "description": "Successfully sent messages",
+                        "description": "Successfully delivered messages",
                         "type": "integer",
-                        "example": 1450
+                        "example": 1200
                     },
                     "failed_messages": {
                         "description": "Failed messages",
                         "type": "integer",
                         "example": 50
                     },
-                    "delivered_messages": {
-                        "description": "Delivered messages",
-                        "type": "integer",
-                        "example": 1400
-                    },
                     "total_cost": {
                         "description": "Total cost",
                         "type": "number",
                         "format": "float",
-                        "example": 75.5
-                    },
-                    "average_cost": {
-                        "description": "Average cost per message",
-                        "type": "number",
-                        "format": "float",
-                        "example": 0.05
-                    },
-                    "by_provider": {
-                        "description": "Usage by provider",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/ProviderUsage"
-                        }
-                    }
-                },
-                "type": "object"
-            },
-            "ProviderUsage": {
-                "title": "Provider Usage",
-                "description": "Usage statistics for a specific provider",
-                "properties": {
-                    "provider": {
-                        "description": "Provider name",
-                        "type": "string",
-                        "example": "eskiz"
-                    },
-                    "messages": {
-                        "description": "Messages sent",
-                        "type": "integer",
-                        "example": 800
-                    },
-                    "cost": {
-                        "description": "Total cost",
-                        "type": "number",
-                        "format": "float",
-                        "example": 40
+                        "example": 62.5
                     },
                     "success_rate": {
                         "description": "Success rate percentage",
                         "type": "number",
                         "format": "float",
-                        "example": 96.5
+                        "example": 96
+                    },
+                    "period": {
+                        "description": "Statistics period",
+                        "type": "string",
+                        "example": "month"
+                    },
+                    "start_date": {
+                        "description": "Period start date",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-01-01"
+                    },
+                    "end_date": {
+                        "description": "Period end date",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-01-31"
                     }
                 },
                 "type": "object"
             },
             "DailyUsage": {
                 "title": "Daily Usage",
-                "description": "Daily usage statistics",
+                "description": "Daily SMS usage statistics",
                 "properties": {
                     "date": {
                         "description": "Date",
@@ -1003,55 +1162,48 @@
                         "format": "date",
                         "example": "2024-01-15"
                     },
-                    "messages": {
-                        "description": "Messages sent",
+                    "messages_sent": {
+                        "description": "Messages sent on this date",
                         "type": "integer",
-                        "example": 50
+                        "example": 45
                     },
-                    "cost": {
-                        "description": "Daily cost",
+                    "messages_delivered": {
+                        "description": "Messages delivered on this date",
+                        "type": "integer",
+                        "example": 43
+                    },
+                    "messages_failed": {
+                        "description": "Messages failed on this date",
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "total_cost": {
+                        "description": "Total cost for this date",
                         "type": "number",
                         "format": "float",
-                        "example": 2.5
+                        "example": 2.25
                     },
                     "success_rate": {
-                        "description": "Success rate percentage",
+                        "description": "Success rate for this date",
                         "type": "number",
                         "format": "float",
-                        "example": 98
+                        "example": 95.56
                     }
                 },
                 "type": "object"
             },
             "UsageSummary": {
                 "title": "Usage Summary",
-                "description": "Summary of SMS usage",
+                "description": "SMS usage summary",
                 "properties": {
-                    "total_messages": {
-                        "description": "Total messages sent",
-                        "type": "integer",
-                        "example": 15000
-                    },
-                    "total_cost": {
-                        "description": "Total cost",
-                        "type": "number",
-                        "format": "float",
-                        "example": 750
-                    },
-                    "active_providers": {
-                        "description": "Number of active providers",
-                        "type": "integer",
-                        "example": 3
-                    },
-                    "last_30_days": {
+                    "current_month": {
                         "$ref": "#/components/schemas/UsageStats"
                     },
-                    "top_providers": {
-                        "description": "Top providers by usage",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/ProviderUsage"
-                        }
+                    "last_month": {
+                        "$ref": "#/components/schemas/UsageStats"
+                    },
+                    "total_lifetime": {
+                        "$ref": "#/components/schemas/UsageStats"
                     }
                 },
                 "type": "object"
@@ -1091,8 +1243,12 @@
                         "description": "Validation errors",
                         "type": "object",
                         "example": {
-                            "to": "The to field is required.",
-                            "message": "The message field is required."
+                            "to": [
+                                "The to field is required."
+                            ],
+                            "message": [
+                                "The message field is required."
+                            ]
                         }
                     }
                 },
@@ -1105,24 +1261,22 @@
                     "first": {
                         "description": "First page URL",
                         "type": "string",
-                        "example": "http://localhost:8000/api/v1/messages?page=1"
+                        "example": "http://api.smshub.com/v1/messages?page=1"
                     },
                     "last": {
                         "description": "Last page URL",
                         "type": "string",
-                        "example": "http://localhost:8000/api/v1/messages?page=10"
+                        "example": "http://api.smshub.com/v1/messages?page=10"
                     },
                     "prev": {
                         "description": "Previous page URL",
                         "type": "string",
-                        "example": "http://localhost:8000/api/v1/messages?page=2",
-                        "nullable": true
+                        "example": "http://api.smshub.com/v1/messages?page=2"
                     },
                     "next": {
                         "description": "Next page URL",
                         "type": "string",
-                        "example": "http://localhost:8000/api/v1/messages?page=4",
-                        "nullable": true
+                        "example": "http://api.smshub.com/v1/messages?page=4"
                     }
                 },
                 "type": "object"
@@ -1163,88 +1317,36 @@
                     }
                 },
                 "type": "object"
-            },
-            "TokenResponse": {
-                "title": "Token Response",
-                "description": "OAuth2 token response",
-                "properties": {
-                    "token_type": {
-                        "description": "Token type",
-                        "type": "string",
-                        "example": "Bearer"
-                    },
-                    "expires_in": {
-                        "description": "Token expiration in seconds",
-                        "type": "integer",
-                        "example": 31536000
-                    },
-                    "access_token": {
-                        "description": "Access token",
-                        "type": "string",
-                        "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9..."
-                    },
-                    "refresh_token": {
-                        "description": "Refresh token",
-                        "type": "string",
-                        "example": "def50200..."
-                    }
-                },
-                "type": "object"
-            },
-            "User": {
-                "title": "User",
-                "description": "User information",
-                "properties": {
-                    "id": {
-                        "description": "User ID",
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "name": {
-                        "description": "User name",
-                        "type": "string",
-                        "example": "John Doe"
-                    },
-                    "email": {
-                        "description": "User email",
-                        "type": "string",
-                        "format": "email",
-                        "example": "john@example.com"
-                    },
-                    "is_admin": {
-                        "description": "Admin status",
-                        "type": "boolean",
-                        "example": false
-                    },
-                    "email_verified_at": {
-                        "description": "Email verification timestamp",
-                        "type": "string",
-                        "format": "datetime",
-                        "example": "2024-01-15T10:30:00Z",
-                        "nullable": true
-                    },
-                    "created_at": {
-                        "description": "Creation timestamp",
-                        "type": "string",
-                        "format": "datetime",
-                        "example": "2024-01-15T10:30:00Z"
-                    },
-                    "updated_at": {
-                        "description": "Last update timestamp",
-                        "type": "string",
-                        "format": "datetime",
-                        "example": "2024-01-15T10:30:00Z"
-                    }
-                },
-                "type": "object"
             }
         },
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
-                "description": "Enter your JWT token",
+                "description": "Enter your access token in the format: Bearer {token}",
                 "bearerFormat": "JWT",
                 "scheme": "bearer"
+            },
+            "oauth2": {
+                "type": "oauth2",
+                "description": "OAuth2 authentication using Laravel Passport",
+                "flows": {
+                    "clientCredentials": {
+                        "tokenUrl": "/oauth/token",
+                        "scopes": {
+                            "read": "Read access to SMS data",
+                            "write": "Write access to send SMS messages",
+                            "admin": "Admin access to manage providers and projects"
+                        }
+                    },
+                    "password": {
+                        "tokenUrl": "/oauth/token",
+                        "scopes": {
+                            "read": "Read access to SMS data",
+                            "write": "Write access to send SMS messages",
+                            "admin": "Admin access to manage providers and projects"
+                        }
+                    }
+                }
             },
             "passport": {
                 "type": "oauth2",
@@ -1279,21 +1381,25 @@
     "tags": [
         {
             "name": "Authentication",
-            "description": "OAuth2 authentication endpoints"
-        },
-        {
-            "name": "Providers",
-            "description": "SMS provider management"
+            "description": "OAuth2 authentication endpoints for obtaining access tokens"
         },
         {
             "name": "Messages",
-            "description": "SMS message operations"
+            "description": "SMS message operations - send messages and check delivery status"
+        },
+        {
+            "name": "Providers",
+            "description": "SMS provider information and management"
         },
         {
             "name": "Usage",
-            "description": "Usage statistics and monitoring"
+            "description": "Usage statistics and billing information"
         }
     ],
+    "externalDocs": {
+        "description": "SMS Hub Developer Guide - Authentication, Rate Limits, Error Handling, and Best Practices",
+        "url": "https://docs.smshub.com/developer-guide"
+    },
     "security": [
         {
             "bearer": []
