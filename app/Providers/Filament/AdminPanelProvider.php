@@ -55,14 +55,15 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            ->authMiddleware([
-                Authenticate::class,
-                FilamentAdminMiddleware::class,
-            ])
+            ->authGuard('web')
+            ->authPasswordBroker('users')
             ->navigationGroups([
                 'Authentication',
                 'SMS Management',
                 'System',
+            ])
+            ->authMiddleware([
+                Authenticate::class,
             ]);
     }
 }

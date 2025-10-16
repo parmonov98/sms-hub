@@ -16,7 +16,17 @@ class FilamentAdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || !Auth::user()->isAdmin()) {
+        // Skip admin check for login page
+        if ($request->routeIs('filament.admin.auth.login') || $request->routeIs('filament.admin.auth.logout')) {
+            return $next($request);
+        }
+
+        if (!Auth::check()) {
+            return redirect()->route('filament.admin.auth.login');
+        }
+
+        if (!Auth::user()->isAdmin()) {
+            Auth::logout();
             return redirect()->route('filament.admin.auth.login')
                 ->with('error', 'You must be an administrator to access this area.');
         }
