@@ -12,7 +12,7 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/oauth/token",
      *     summary="Get OAuth2 access token",
-     *     description="Obtain an access token using OAuth2 client credentials authentication for server-to-server communication. The access token is required for all subsequent API calls.",
+     *     description="Obtain an access token using OAuth2 client credentials authentication for server-to-server communication. The access token is required for all subsequent API calls. No scopes are required for this endpoint.",
      *     operationId="getToken",
      *     tags={"Authentication"},
      *     @OA\RequestBody(
@@ -39,12 +39,6 @@ class AuthController extends Controller
              *                 description="Your OAuth2 client secret (keep this secure)",
              *                 example="EqPN6oCgpb9SG7TriwGSWHJO9S57DOSbGJ7Nf9AA"
              *             ),
-     *             @OA\Property(
-     *                 property="scope",
-     *                 type="string",
-     *                 description="Requested scopes (space-separated: read, write, admin)",
-     *                 example="read write"
-     *             )
      *         )
      *     ),
      *     @OA\Response(
