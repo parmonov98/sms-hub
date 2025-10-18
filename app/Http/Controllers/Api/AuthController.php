@@ -135,7 +135,7 @@ class AuthController extends Controller
      *     description="Get information about the currently authenticated user",
      *     operationId="getCurrentUser",
      *     tags={"Authentication"},
-     *     security={{"bearerAuth": {}}},
+     *     security={{"bearer": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="User information retrieved successfully",

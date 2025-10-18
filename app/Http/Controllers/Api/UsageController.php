@@ -15,7 +15,7 @@ class UsageController extends Controller
      *     description="Retrieve comprehensive SMS usage statistics for your account. This endpoint provides detailed insights into your SMS consumption, costs, and delivery performance across different time periods and providers.",
      *     operationId="getUsage",
      *     tags={"Usage"},
-     *     security={{"bearerAuth": {}}},
+     *     security={{"bearer": {}}},
      *     @OA\Parameter(
      *         name="period",
      *         in="query",
@@ -75,7 +75,7 @@ class UsageController extends Controller
      *     description="Retrieve daily SMS usage statistics",
      *     operationId="getDailyUsage",
      *     tags={"Usage"},
-     *     security={{"bearerAuth": {}}},
+     *     security={{"bearer": {}}},
      *     @OA\Parameter(
      *         name="start_date",
      *         in="query",
@@ -116,7 +116,7 @@ class UsageController extends Controller
      *     description="Retrieve a summary of SMS usage statistics",
      *     operationId="getUsageSummary",
      *     tags={"Usage"},
-     *     security={{"bearerAuth": {}}},
+     *     security={{"bearer": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",

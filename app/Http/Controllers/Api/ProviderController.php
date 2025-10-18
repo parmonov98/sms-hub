@@ -15,7 +15,7 @@ class ProviderController extends Controller
      *     description="Retrieve a list of all available SMS providers with their capabilities, status, and priority. This information helps you understand which providers are available for sending messages and their specific features like Unicode support, delivery reports, etc.",
      *     operationId="getProviders",
      *     tags={"Providers"},
-     *     security={{"bearerAuth": {}}},
+     *     security={{"bearer": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="Providers retrieved successfully",

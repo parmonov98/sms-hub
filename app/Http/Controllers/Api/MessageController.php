@@ -15,7 +15,7 @@ class MessageController extends Controller
      *     description="Retrieve a paginated list of SMS messages sent by your application. Use this endpoint to track message history, check delivery status, and monitor your SMS usage. You can filter by status and paginate through results.",
      *     operationId="getMessages",
      *     tags={"Messages"},
-     *     security={{"bearerAuth": {}}},
+     *     security={{"bearer": {}}},
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
@@ -84,7 +84,7 @@ class MessageController extends Controller
      *     description="Send a new SMS message through the SMS Hub. The message will be queued for delivery and processed by the most suitable provider based on availability and priority. You can specify a preferred provider or let the system choose automatically.",
      *     operationId="sendMessage",
      *     tags={"Messages"},
-     *     security={{"bearerAuth": {}}},
+     *     security={{"bearer": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         description="SMS message details",
@@ -214,7 +214,7 @@ class MessageController extends Controller
      *     description="Retrieve detailed information about a specific SMS message including delivery status, cost, and provider information. Use this endpoint to check the current status of a message you've sent.",
      *     operationId="getMessage",
      *     tags={"Messages"},
-     *     security={{"bearerAuth": {}}},
+     *     security={{"bearer": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",

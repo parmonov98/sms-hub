@@ -290,7 +290,7 @@
                 },
                 "security": [
                     {
-                        "bearerAuth": []
+                        "bearer": []
                     }
                 ]
             }
@@ -414,7 +414,7 @@
                 },
                 "security": [
                     {
-                        "bearerAuth": []
+                        "bearer": []
                     }
                 ]
             },
@@ -550,7 +550,7 @@
                 },
                 "security": [
                     {
-                        "bearerAuth": []
+                        "bearer": []
                     }
                 ]
             }
@@ -629,7 +629,7 @@
                 },
                 "security": [
                     {
-                        "bearerAuth": []
+                        "bearer": []
                     }
                 ]
             }
@@ -674,7 +674,7 @@
                 },
                 "security": [
                     {
-                        "bearerAuth": []
+                        "bearer": []
                     }
                 ]
             }
@@ -777,7 +777,7 @@
                 },
                 "security": [
                     {
-                        "bearerAuth": []
+                        "bearer": []
                     }
                 ]
             }
@@ -844,7 +844,7 @@
                 },
                 "security": [
                     {
-                        "bearerAuth": []
+                        "bearer": []
                     }
                 ]
             }
@@ -886,7 +886,7 @@
                 },
                 "security": [
                     {
-                        "bearerAuth": []
+                        "bearer": []
                     }
                 ]
             }
@@ -1304,48 +1304,6 @@
             }
         },
         "securitySchemes": {
-            "bearerAuth": {
-                "type": "http",
-                "description": "Enter your access token in the format: Bearer {token}",
-                "bearerFormat": "JWT",
-                "scheme": "bearer"
-            },
-            "oauth2": {
-                "type": "oauth2",
-                "description": "OAuth2 authentication using Laravel Passport",
-                "flows": {
-                    "clientCredentials": {
-                        "tokenUrl": "/oauth/token",
-                        "scopes": {
-                            "read": "Read access to SMS data",
-                            "write": "Write access to send SMS messages",
-                            "admin": "Admin access to manage providers and projects"
-                        }
-                    }
-                }
-            },
-            "passport": {
-                "type": "oauth2",
-                "description": "Laravel passport oauth2 security.",
-                "flows": {
-                    "clientCredentials": {
-                        "tokenUrl": "http://localhost:8000/oauth/token",
-                        "scopes": {
-                            "read": "Read access",
-                            "write": "Write access",
-                            "admin": "Admin access"
-                        }
-                    },
-                    "password": {
-                        "tokenUrl": "http://localhost:8000/oauth/token",
-                        "scopes": {
-                            "read": "Read access",
-                            "write": "Write access",
-                            "admin": "Admin access"
-                        }
-                    }
-                }
-            },
             "bearer": {
                 "type": "http",
                 "description": "Enter token in format (Bearer <token>)",

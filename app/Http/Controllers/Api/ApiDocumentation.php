@@ -39,28 +39,7 @@ use OpenApi\Annotations as OA;
  *     description="Development Server"
  * )
  *
- * @OA\SecurityScheme(
- *     securityScheme="bearerAuth",
- *     type="http",
- *     scheme="bearer",
- *     bearerFormat="JWT",
- *     description="Enter your access token in the format: Bearer {token}"
- * )
  *
- * @OA\SecurityScheme(
- *     securityScheme="oauth2",
- *     type="oauth2",
- *     description="OAuth2 authentication using Laravel Passport",
- *     @OA\Flow(
- *         flow="clientCredentials",
- *         tokenUrl="/oauth/token",
- *         scopes={
- *             "read": "Read access to SMS data",
- *             "write": "Write access to send SMS messages",
- *             "admin": "Admin access to manage providers and projects"
- *         }
- *     )
- * )
  *
  * @OA\Tag(
  *     name="Authentication",
