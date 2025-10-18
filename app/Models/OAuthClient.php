@@ -31,16 +31,14 @@ class OAuthClient extends Model
     ];
 
     /**
-     * Automatically hash the secret when it's set
+     * Store OAuth client secrets as plain text (Laravel Passport requirement)
+     * OAuth clients need plain text secrets for authentication to work properly
      */
     public function setSecretAttribute($value)
     {
-        // Only hash if the value is not already hashed (doesn't start with $2y$)
-        if ($value && !str_starts_with($value, '$2y$')) {
-            $this->attributes['secret'] = bcrypt($value);
-        } else {
-            $this->attributes['secret'] = $value;
-        }
+        // Don't hash OAuth client secrets - Laravel Passport expects plain text
+        // The secret is already generated as a secure random string in CreateOAuthClient
+        $this->attributes['secret'] = $value;
     }
 
     protected $hidden = [
