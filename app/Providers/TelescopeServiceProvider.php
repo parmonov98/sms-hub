@@ -61,6 +61,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
                 $user->isAdmin() ||
                 in_array($user->email, [
                     'admin@domain.uz', // Production admin email
+                    'admin@devdata.uz', // Alternative admin email
                     // Add more authorized emails as needed
                 ])
             );

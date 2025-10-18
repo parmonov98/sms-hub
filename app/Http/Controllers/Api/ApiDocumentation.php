@@ -25,12 +25,12 @@ use OpenApi\Annotations as OA;
  * )
  *
  * @OA\Server(
- *     url="https://api.smshub.com",
+ *     url="https://smshub.devdata.uz",
  *     description="Production Server"
  * )
  *
  * @OA\Server(
- *     url="https://staging-api.smshub.com",
+ *     url="https://staging.smshub.devdata.uz",
  *     description="Staging Server"
  * )
  *

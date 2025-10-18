@@ -16,11 +16,11 @@
     },
     "servers": [
         {
-            "url": "https://api.smshub.com",
+            "url": "https://smshub.devdata.uz",
             "description": "Production Server"
         },
         {
-            "url": "https://staging-api.smshub.com",
+            "url": "https://staging.smshub.devdata.uz",
             "description": "Staging Server"
         },
         {
