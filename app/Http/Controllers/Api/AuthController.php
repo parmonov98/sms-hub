@@ -31,13 +31,13 @@ class AuthController extends Controller
              *                 property="client_id",
              *                 type="string",
              *                 description="Your OAuth2 client ID (obtained from the admin panel)",
-             *                 example="babaa32c-85f1-4388-81fd-58e0e5ef225c"
+             *                 example="0199f662-a7e6-72bc-a87e-4885987c598d"
              *             ),
              *             @OA\Property(
              *                 property="client_secret",
              *                 type="string",
              *                 description="Your OAuth2 client secret (keep this secure)",
-             *                 example="$2y$12$dR/L9brF3UXpVo.GOcf3bem7F2nye1z/oZszLoYyAGTOVJDxN.I6W"
+             *                 example="EqPN6oCgpb9SG7TriwGSWHJO9S57DOSbGJ7Nf9AA"
              *             ),
      *             @OA\Property(
      *                 property="scope",
@@ -100,8 +100,8 @@ class AuthController extends Controller
      *             required={"grant_type", "refresh_token"},
      *             @OA\Property(property="grant_type", type="string", description="Grant type", example="refresh_token"),
      *             @OA\Property(property="refresh_token", type="string", description="Refresh token", example="def50200..."),
-     *             @OA\Property(property="client_id", type="string", description="OAuth2 client ID", example="babaa32c-85f1-4388-81fd-58e0e5ef225c"),
-     *             @OA\Property(property="client_secret", type="string", description="OAuth2 client secret", example="$2y$12$dR/L9brF3UXpVo.GOcf3bem7F2nye1z/oZszLoYyAGTOVJDxN.I6W")
+     *             @OA\Property(property="client_id", type="string", description="OAuth2 client ID", example="0199f662-a7e6-72bc-a87e-4885987c598d"),
+     *             @OA\Property(property="client_secret", type="string", description="OAuth2 client secret", example="EqPN6oCgpb9SG7TriwGSWHJO9S57DOSbGJ7Nf9AA")
      *         )
      *     ),
      *     @OA\Response(

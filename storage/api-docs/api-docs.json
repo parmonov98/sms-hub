@@ -60,12 +60,12 @@
                                     "client_id": {
                                         "description": "Your OAuth2 client ID (obtained from the admin panel)",
                                         "type": "string",
-                                        "example": "babaa32c-85f1-4388-81fd-58e0e5ef225c"
+                                        "example": "0199f662-a7e6-72bc-a87e-4885987c598d"
                                     },
                                     "client_secret": {
                                         "description": "Your OAuth2 client secret (keep this secure)",
                                         "type": "string",
-                                        "example": "$2y$12$dR/L9brF3UXpVo.GOcf3bem7F2nye1z/oZszLoYyAGTOVJDxN.I6W"
+                                        "example": "EqPN6oCgpb9SG7TriwGSWHJO9S57DOSbGJ7Nf9AA"
                                     },
                                     "scope": {
                                         "description": "Requested scopes (space-separated: read, write, admin)",
@@ -191,12 +191,12 @@
                                     "client_id": {
                                         "description": "OAuth2 client ID",
                                         "type": "string",
-                                        "example": "babaa32c-85f1-4388-81fd-58e0e5ef225c"
+                                        "example": "0199f662-a7e6-72bc-a87e-4885987c598d"
                                     },
                                     "client_secret": {
                                         "description": "OAuth2 client secret",
                                         "type": "string",
-                                        "example": "$2y$12$dR/L9brF3UXpVo.GOcf3bem7F2nye1z/oZszLoYyAGTOVJDxN.I6W"
+                                        "example": "EqPN6oCgpb9SG7TriwGSWHJO9S57DOSbGJ7Nf9AA"
                                     }
                                 },
                                 "type": "object"
