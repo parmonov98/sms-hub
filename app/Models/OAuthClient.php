@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class OAuthClient extends Model
 {
     protected $table = 'oauth_clients';
-    
+
     protected $keyType = 'string';
-    
+
     public $incrementing = false;
-    
+
     protected $fillable = [
         'id',
         'owner_type',

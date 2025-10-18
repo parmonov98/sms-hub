@@ -9,7 +9,7 @@ The OAuth client secrets are automatically hashed when stored in the database. Y
 ```bash
 curl -X POST https://smshub.devdata.uz/oauth/token \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=client_credentials&client_id=babaa32c-85f1-4388-81fd-58e0e5ef225c&client_secret=\$2y\$12\$dR/L9brF3UXpVo.GOcf3bem7F2nye1z/oZszLoYyAGTOVJDxN.I6W"
+  -d "grant_type=client_credentials&client_id=0199f662-a7e6-72bc-a87e-4885987c598d&client_secret=EqPN6oCgpb9SG7TriwGSWHJO9S57DOSbGJ7Nf9AA"
 ```
 
 **Response:**
@@ -63,13 +63,13 @@ curl -X POST http://localhost:8000/api/v1/messages \
 #!/bin/bash
 
 # Working credentials (use the plain text secret, not the hashed one)
-CLIENT_ID="cc5754f0-b094-47c2-a4b9-4df81a9d6344"
-CLIENT_SECRET="KZc0yaWbybbWAy3FdOrPM6PeU93dQzyIlNmORd9V"
+CLIENT_ID="0199f662-a7e6-72bc-a87e-4885987c598d"
+CLIENT_SECRET="EqPN6oCgpb9SG7TriwGSWHJO9S57DOSbGJ7Nf9AA"
 
 # Get access token
 ACCESS_TOKEN=$(curl -s -X POST https://smshub.devdata.uz/oauth/token \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=client_credentials&client_id=babaa32c-85f1-4388-81fd-58e0e5ef225c&client_secret=\$2y\$12\$dR/L9brF3UXpVo.GOcf3bem7F2nye1z/oZszLoYyAGTOVJDxN.I6W" \
+  -d "grant_type=client_credentials&client_id=0199f662-a7e6-72bc-a87e-4885987c598d&client_secret=EqPN6oCgpb9SG7TriwGSWHJO9S57DOSbGJ7Nf9AA" \
   | jq -r '.access_token')
 
 echo "Access Token: $ACCESS_TOKEN"
