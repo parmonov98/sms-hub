@@ -60,12 +60,12 @@
                                     "client_id": {
                                         "description": "Your OAuth2 client ID (obtained from the admin panel)",
                                         "type": "string",
-                                        "example": "9110295a-b15b-4091-8f8a-1adf2a85313d"
+                                        "example": "babaa32c-85f1-4388-81fd-58e0e5ef225c"
                                     },
                                     "client_secret": {
                                         "description": "Your OAuth2 client secret (keep this secure)",
                                         "type": "string",
-                                        "example": "$2y$12$nd7sb1b.wjVxjCF16hJmJeoPnI80ktXD/iLDpZJbGN6tsmzmgGQw2"
+                                        "example": "$2y$12$dR/L9brF3UXpVo.GOcf3bem7F2nye1z/oZszLoYyAGTOVJDxN.I6W"
                                     },
                                     "scope": {
                                         "description": "Requested scopes (space-separated: read, write, admin)",
@@ -191,12 +191,12 @@
                                     "client_id": {
                                         "description": "OAuth2 client ID",
                                         "type": "string",
-                                        "example": "9110295a-b15b-4091-8f8a-1adf2a85313d"
+                                        "example": "babaa32c-85f1-4388-81fd-58e0e5ef225c"
                                     },
                                     "client_secret": {
                                         "description": "OAuth2 client secret",
                                         "type": "string",
-                                        "example": "$2y$12$nd7sb1b.wjVxjCF16hJmJeoPnI80ktXD/iLDpZJbGN6tsmzmgGQw2"
+                                        "example": "$2y$12$dR/L9brF3UXpVo.GOcf3bem7F2nye1z/oZszLoYyAGTOVJDxN.I6W"
                                     }
                                 },
                                 "type": "object"
