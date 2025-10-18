@@ -65,7 +65,7 @@
                                     "client_secret": {
                                         "description": "Your OAuth2 client secret (keep this secure)",
                                         "type": "string",
-                                        "example": "$2y$12$eeOaibbopjibNj6Mn/PyQ.uT4JmqQdT2hZJRTlBE6bU7XLe1cUZ2G"
+                                        "example": "$2y$12$nd7sb1b.wjVxjCF16hJmJeoPnI80ktXD/iLDpZJbGN6tsmzmgGQw2"
                                     },
                                     "scope": {
                                         "description": "Requested scopes (space-separated: read, write, admin)",
@@ -196,7 +196,7 @@
                                     "client_secret": {
                                         "description": "OAuth2 client secret",
                                         "type": "string",
-                                        "example": "$2y$12$eeOaibbopjibNj6Mn/PyQ.uT4JmqQdT2hZJRTlBE6bU7XLe1cUZ2G"
+                                        "example": "$2y$12$nd7sb1b.wjVxjCF16hJmJeoPnI80ktXD/iLDpZJbGN6tsmzmgGQw2"
                                     }
                                 },
                                 "type": "object"

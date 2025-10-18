@@ -37,7 +37,7 @@ class AuthController extends Controller
              *                 property="client_secret",
              *                 type="string",
              *                 description="Your OAuth2 client secret (keep this secure)",
-             *                 example="$2y$12$eeOaibbopjibNj6Mn/PyQ.uT4JmqQdT2hZJRTlBE6bU7XLe1cUZ2G"
+             *                 example="$2y$12$nd7sb1b.wjVxjCF16hJmJeoPnI80ktXD/iLDpZJbGN6tsmzmgGQw2"
              *             ),
      *             @OA\Property(
      *                 property="scope",
@@ -101,7 +101,7 @@ class AuthController extends Controller
      *             @OA\Property(property="grant_type", type="string", description="Grant type", example="refresh_token"),
      *             @OA\Property(property="refresh_token", type="string", description="Refresh token", example="def50200..."),
      *             @OA\Property(property="client_id", type="string", description="OAuth2 client ID", example="9110295a-b15b-4091-8f8a-1adf2a85313d"),
-     *             @OA\Property(property="client_secret", type="string", description="OAuth2 client secret", example="$2y$12$eeOaibbopjibNj6Mn/PyQ.uT4JmqQdT2hZJRTlBE6bU7XLe1cUZ2G")
+     *             @OA\Property(property="client_secret", type="string", description="OAuth2 client secret", example="$2y$12$nd7sb1b.wjVxjCF16hJmJeoPnI80ktXD/iLDpZJbGN6tsmzmgGQw2")
      *         )
      *     ),
      *     @OA\Response(
