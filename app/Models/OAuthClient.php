@@ -41,6 +41,17 @@ class OAuthClient extends Model
         $this->attributes['secret'] = $value;
     }
 
+    /**
+     * Override the secret getter to return plain text for OAuth clients
+     * This ensures compatibility with Laravel Passport's ClientRepository
+     */
+    public function getSecretAttribute($value)
+    {
+        // For OAuth clients, always return the secret as stored (plain text)
+        // This prevents any automatic hashing from interfering with OAuth authentication
+        return $value;
+    }
+
     protected $hidden = [
         'secret',
     ];
