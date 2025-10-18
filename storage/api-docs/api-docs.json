@@ -35,7 +35,7 @@
                     "Authentication"
                 ],
                 "summary": "Get OAuth2 access token",
-                "description": "Obtain an access token using OAuth2 authentication. This endpoint supports both client credentials grant (for server-to-server communication) and password grant (for user authentication). The access token is required for all subsequent API calls.",
+                "description": "Obtain an access token using OAuth2 client credentials authentication for server-to-server communication. The access token is required for all subsequent API calls.",
                 "operationId": "getToken",
                 "requestBody": {
                     "description": "OAuth2 token request parameters",
@@ -50,33 +50,22 @@
                                 ],
                                 "properties": {
                                     "grant_type": {
-                                        "description": "OAuth2 grant type - use 'client_credentials' for server-to-server, 'password' for user authentication",
+                                        "description": "OAuth2 grant type - use 'client_credentials' for server-to-server authentication",
                                         "type": "string",
                                         "enum": [
-                                            "client_credentials",
-                                            "password"
+                                            "client_credentials"
                                         ],
                                         "example": "client_credentials"
                                     },
                                     "client_id": {
                                         "description": "Your OAuth2 client ID (obtained from the admin panel)",
                                         "type": "string",
-                                        "example": "01996688-68b6-73da-b265-98d48d707a69"
+                                        "example": "9110295a-b15b-4091-8f8a-1adf2a85313d"
                                     },
                                     "client_secret": {
                                         "description": "Your OAuth2 client secret (keep this secure)",
                                         "type": "string",
-                                        "example": "your-client-secret"
-                                    },
-                                    "username": {
-                                        "description": "Username (required for password grant only)",
-                                        "type": "string",
-                                        "example": "user@example.com"
-                                    },
-                                    "password": {
-                                        "description": "Password (required for password grant only)",
-                                        "type": "string",
-                                        "example": "password"
+                                        "example": "$2y$12$eeOaibbopjibNj6Mn/PyQ.uT4JmqQdT2hZJRTlBE6bU7XLe1cUZ2G"
                                     },
                                     "scope": {
                                         "description": "Requested scopes (space-separated: read, write, admin)",
@@ -202,12 +191,12 @@
                                     "client_id": {
                                         "description": "OAuth2 client ID",
                                         "type": "string",
-                                        "example": "01996688-68b6-73da-b265-98d48d707a69"
+                                        "example": "9110295a-b15b-4091-8f8a-1adf2a85313d"
                                     },
                                     "client_secret": {
                                         "description": "OAuth2 client secret",
                                         "type": "string",
-                                        "example": "your-client-secret"
+                                        "example": "$2y$12$eeOaibbopjibNj6Mn/PyQ.uT4JmqQdT2hZJRTlBE6bU7XLe1cUZ2G"
                                     }
                                 },
                                 "type": "object"
@@ -1331,14 +1320,6 @@
                 "description": "OAuth2 authentication using Laravel Passport",
                 "flows": {
                     "clientCredentials": {
-                        "tokenUrl": "/oauth/token",
-                        "scopes": {
-                            "read": "Read access to SMS data",
-                            "write": "Write access to send SMS messages",
-                            "admin": "Admin access to manage providers and projects"
-                        }
-                    },
-                    "password": {
                         "tokenUrl": "/oauth/token",
                         "scopes": {
                             "read": "Read access to SMS data",

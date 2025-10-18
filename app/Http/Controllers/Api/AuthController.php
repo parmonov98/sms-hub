@@ -12,7 +12,7 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/oauth/token",
      *     summary="Get OAuth2 access token",
-     *     description="Obtain an access token using OAuth2 authentication. This endpoint supports both client credentials grant (for server-to-server communication) and password grant (for user authentication). The access token is required for all subsequent API calls.",
+     *     description="Obtain an access token using OAuth2 client credentials authentication for server-to-server communication. The access token is required for all subsequent API calls.",
      *     operationId="getToken",
      *     tags={"Authentication"},
      *     @OA\RequestBody(
@@ -23,34 +23,22 @@ class AuthController extends Controller
      *             @OA\Property(
      *                 property="grant_type",
      *                 type="string",
-     *                 enum={"client_credentials", "password"},
-     *                 description="OAuth2 grant type - use 'client_credentials' for server-to-server, 'password' for user authentication",
+     *                 enum={"client_credentials"},
+     *                 description="OAuth2 grant type - use 'client_credentials' for server-to-server authentication",
      *                 example="client_credentials"
      *             ),
-     *             @OA\Property(
-     *                 property="client_id",
-     *                 type="string",
-     *                 description="Your OAuth2 client ID (obtained from the admin panel)",
-     *                 example="01996688-68b6-73da-b265-98d48d707a69"
-     *             ),
-     *             @OA\Property(
-     *                 property="client_secret",
-     *                 type="string",
-     *                 description="Your OAuth2 client secret (keep this secure)",
-     *                 example="your-client-secret"
-     *             ),
-     *             @OA\Property(
-     *                 property="username",
-     *                 type="string",
-     *                 description="Username (required for password grant only)",
-     *                 example="user@example.com"
-     *             ),
-     *             @OA\Property(
-     *                 property="password",
-     *                 type="string",
-     *                 description="Password (required for password grant only)",
-     *                 example="password"
-     *             ),
+             *             @OA\Property(
+             *                 property="client_id",
+             *                 type="string",
+             *                 description="Your OAuth2 client ID (obtained from the admin panel)",
+             *                 example="9110295a-b15b-4091-8f8a-1adf2a85313d"
+             *             ),
+             *             @OA\Property(
+             *                 property="client_secret",
+             *                 type="string",
+             *                 description="Your OAuth2 client secret (keep this secure)",
+             *                 example="$2y$12$eeOaibbopjibNj6Mn/PyQ.uT4JmqQdT2hZJRTlBE6bU7XLe1cUZ2G"
+             *             ),
      *             @OA\Property(
      *                 property="scope",
      *                 type="string",
@@ -112,8 +100,8 @@ class AuthController extends Controller
      *             required={"grant_type", "refresh_token"},
      *             @OA\Property(property="grant_type", type="string", description="Grant type", example="refresh_token"),
      *             @OA\Property(property="refresh_token", type="string", description="Refresh token", example="def50200..."),
-     *             @OA\Property(property="client_id", type="string", description="OAuth2 client ID", example="01996688-68b6-73da-b265-98d48d707a69"),
-     *             @OA\Property(property="client_secret", type="string", description="OAuth2 client secret", example="your-client-secret")
+     *             @OA\Property(property="client_id", type="string", description="OAuth2 client ID", example="9110295a-b15b-4091-8f8a-1adf2a85313d"),
+     *             @OA\Property(property="client_secret", type="string", description="OAuth2 client secret", example="$2y$12$eeOaibbopjibNj6Mn/PyQ.uT4JmqQdT2hZJRTlBE6bU7XLe1cUZ2G")
      *         )
      *     ),
      *     @OA\Response(

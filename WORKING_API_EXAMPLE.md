@@ -7,9 +7,9 @@ The OAuth client secrets are automatically hashed when stored in the database. Y
 
 ### Step 1: Get Access Token
 ```bash
-curl -X POST http://localhost:8000/oauth/token \
+curl -X POST https://smshub.devdata.uz/oauth/token \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=client_credentials&client_id=cc5754f0-b094-47c2-a4b9-4df81a9d6344&client_secret=KZc0yaWbybbWAy3FdOrPM6PeU93dQzyIlNmORd9V"
+  -d "grant_type=client_credentials&client_id=9110295a-b15b-4091-8f8a-1adf2a85313d&client_secret=\$2y\$12\$eeOaibbopjibNj6Mn/PyQ.uT4JmqQdT2hZJRTlBE6bU7XLe1cUZ2G"
 ```
 
 **Response:**
@@ -67,15 +67,15 @@ CLIENT_ID="cc5754f0-b094-47c2-a4b9-4df81a9d6344"
 CLIENT_SECRET="KZc0yaWbybbWAy3FdOrPM6PeU93dQzyIlNmORd9V"
 
 # Get access token
-ACCESS_TOKEN=$(curl -s -X POST http://localhost:8000/oauth/token \
+ACCESS_TOKEN=$(curl -s -X POST https://smshub.devdata.uz/oauth/token \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=client_credentials&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET" \
+  -d "grant_type=client_credentials&client_id=9110295a-b15b-4091-8f8a-1adf2a85313d&client_secret=\$2y\$12\$eeOaibbopjibNj6Mn/PyQ.uT4JmqQdT2hZJRTlBE6bU7XLe1cUZ2G" \
   | jq -r '.access_token')
 
 echo "Access Token: $ACCESS_TOKEN"
 
 # Send SMS
-curl -X POST http://localhost:8000/api/v1/messages \
+curl -X POST https://smshub.devdata.uz/api/v1/messages \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{

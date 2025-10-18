@@ -59,15 +59,6 @@ use OpenApi\Annotations as OA;
  *             "write": "Write access to send SMS messages",
  *             "admin": "Admin access to manage providers and projects"
  *         }
- *     ),
- *     @OA\Flow(
- *         flow="password",
- *         tokenUrl="/oauth/token",
- *         scopes={
- *             "read": "Read access to SMS data",
- *             "write": "Write access to send SMS messages",
- *             "admin": "Admin access to manage providers and projects"
- *         }
  *     )
  * )
  *
