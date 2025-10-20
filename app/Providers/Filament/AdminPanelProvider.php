@@ -7,7 +7,6 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use App\Filament\Resources\DashboardResource\Widgets\OAuthClientStatsWidget;
-use App\Http\Middleware\FilamentAdminMiddleware;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -64,7 +63,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                \App\Http\Middleware\FilamentAdminMiddleware::class,
             ]);
     }
 }
