@@ -78,10 +78,12 @@ services:
     depends_on:
       - db
       - redis
-    command: php artisan queue:work --daemon
+    command: php artisan horizon
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
+      - QUEUE_CONNECTION=redis
+      - REDIS_HOST=redis
 
 networks:
   sms-hub-network:
