@@ -18,7 +18,7 @@ services:
       - redis
 
   db:
-    image: mysql:8.0
+    image: mariadb:10.11
     container_name: sms-hub-db
     restart: unless-stopped
     environment:
@@ -27,11 +27,11 @@ services:
       MYSQL_PASSWORD: password
       MYSQL_USER: sms_hub
       SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
+      SERVICE_NAME: mariadb
     ports:
       - "3306:3306"
     volumes:
-      - ./docker/mysql/data:/var/lib/mysql
+      - mariadb_data:/var/lib/mysql
       - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
     networks:
       - sms-hub-network
@@ -75,6 +75,9 @@ services:
       - sms-hub-network
     depends_on:
       - db
+
+volumes:
+  mariadb_data:
 
 networks:
   sms-hub-network:

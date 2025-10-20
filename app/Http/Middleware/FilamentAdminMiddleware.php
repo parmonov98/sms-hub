@@ -25,6 +25,7 @@ class FilamentAdminMiddleware
             return redirect()->route('filament.admin.auth.login');
         }
 
+        // Check if user is admin
         if (!Auth::user()->isAdmin()) {
             Auth::logout();
             return redirect()->route('filament.admin.auth.login')

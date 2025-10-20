@@ -64,8 +64,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
-            ->authMiddleware([
                 \App\Http\Middleware\FilamentAdminMiddleware::class,
             ]);
     }
