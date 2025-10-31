@@ -42,7 +42,7 @@ class AggregateUsageJob implements ShouldQueue
                 DB::raw('MAX(currency) as currency'),
             ])
             ->whereDate('created_at', $this->date)
-            ->where('status', 'sent')
+            ->where('status', 'delivered')
             ->groupBy('project_id')
             ->get();
 
