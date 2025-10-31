@@ -35,16 +35,18 @@ Route::middleware('client_credentials')->group(function () {
     Route::prefix('v1')->group(function () {
         // Authentication
         Route::get('/auth/me', [AuthController::class, 'me']);
-        
+
         // Providers
         Route::get('/providers', [ProviderController::class, 'index']);
-        
+
         // Messages
         Route::post('/messages', [MessageController::class, 'store']);
         Route::get('/messages/{message}', [MessageController::class, 'show']);
-        
+
         // Usage
         Route::get('/usage', [UsageController::class, 'index']);
+        Route::get('/usage/daily', [UsageController::class, 'daily']);
+        Route::get('/usage/summary', [UsageController::class, 'summary']);
     });
 });
 
@@ -52,10 +54,10 @@ Route::middleware('client_credentials')->group(function () {
 Route::middleware(['auth:api', 'admin'])->prefix('v1/admin')->group(function () {
     // Admin Providers
     Route::apiResource('providers', AdminProviderController::class);
-    
+
     // Admin Projects
     Route::apiResource('projects', AdminProjectController::class);
-    
+
     // Project Provider Credentials
     Route::post('/projects/{project}/providers', [AdminProjectController::class, 'attachProvider']);
     Route::patch('/projects/{project}/providers/{provider}', [AdminProjectController::class, 'updateProvider']);
