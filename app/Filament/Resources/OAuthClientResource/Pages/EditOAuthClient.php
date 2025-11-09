@@ -16,4 +16,12 @@ class EditOAuthClient extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Force grant_types to only contain client_credentials
+        $data['grant_types'] = ['client_credentials'];
+        
+        return $data;
+    }
 }

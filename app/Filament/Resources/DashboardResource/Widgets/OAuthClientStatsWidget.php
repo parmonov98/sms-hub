@@ -13,7 +13,6 @@ class OAuthClientStatsWidget extends BaseWidget
         $totalClients = OAuthClient::count();
         $activeClients = OAuthClient::where('revoked', false)->count();
         $revokedClients = OAuthClient::where('revoked', true)->count();
-        $passwordClients = OAuthClient::whereJsonContains('grant_types', 'password')->count();
 
         return [
             Stat::make('Total OAuth Clients', $totalClients)
@@ -30,11 +29,6 @@ class OAuthClientStatsWidget extends BaseWidget
                 ->description('Revoked clients')
                 ->descriptionIcon('heroicon-m-x-circle')
                 ->color('danger'),
-            
-            Stat::make('Password Grant Clients', $passwordClients)
-                ->description('Clients with password grant')
-                ->descriptionIcon('heroicon-m-lock-closed')
-                ->color('warning'),
         ];
     }
 }

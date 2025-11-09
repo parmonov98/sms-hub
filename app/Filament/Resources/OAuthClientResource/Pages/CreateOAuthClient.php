@@ -36,10 +36,8 @@ class CreateOAuthClient extends CreateRecord
             $data['redirect_uris'] = array_filter(array_map('trim', explode(',', $data['redirect_uris'])));
         }
         
-        // Ensure grant_types is an array
-        if (!isset($data['grant_types']) || !is_array($data['grant_types'])) {
-            $data['grant_types'] = ['client_credentials'];
-        }
+        // Force grant_types to only contain client_credentials
+        $data['grant_types'] = ['client_credentials'];
         
         return $data;
     }
