@@ -25,8 +25,8 @@ Route::get('/test', function () {
     return response()->json(['message' => 'API is working!', 'timestamp' => now()]);
 });
 
-// OAuth2 Authentication routes (handled by Passport)
-// Route::post('/oauth/token', [AuthController::class, 'getToken']); // Use Passport's default route
+// OAuth2 Authentication routes
+Route::post('/oauth/token', [AuthController::class, 'getToken']);
 Route::post('/v1/auth/refresh', [AuthController::class, 'refreshToken']);
 
 // Protected API routes - using client credentials middleware for machine-to-machine auth

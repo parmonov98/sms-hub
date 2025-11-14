@@ -76,9 +76,31 @@ class AuthController extends Controller
      */
     public function getToken(Request $request)
     {
-        // Let Passport handle the token request
-        return app(\Laravel\Passport\Http\Controllers\AccessTokenController::class)
-            ->issueToken($request);
+        try {
+            // Let Passport handle the token request
+            return app(\Laravel\Passport\Http\Controllers\AccessTokenController::class)
+                ->issueToken($request);
+        } catch (\League\OAuth2\Server\Exception\OAuthServerException $e) {
+            // Return proper OAuth error response
+            return response()->json([
+                'error' => $e->getErrorType(),
+                'error_description' => $e->getMessage(),
+                'hint' => $e->getHint(),
+            ], $e->getHttpStatusCode());
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('OAuth token request failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all(),
+            ]);
+
+            // Return generic error (don't expose internal details in production)
+            return response()->json([
+                'error' => 'server_error',
+                'error_description' => 'An internal server error occurred while processing your request.',
+            ], 500);
+        }
     }
 
     /**

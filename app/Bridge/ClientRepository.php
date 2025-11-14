@@ -27,8 +27,23 @@ class ClientRepository extends BaseClientRepository
             return false;
         }
 
-        // For OAuth clients, compare secrets as plain text (not hashed)
-        // This allows Filament-created clients to work with OAuth authentication
-        return $clientSecret === $record->secret;
+        // Check if secret matches (plain text comparison for Filament-created clients)
+        if ($clientSecret !== $record->secret) {
+            return false;
+        }
+
+        // Validate that the client supports the requested grant type
+        $grantTypes = $record->grant_types ?? [];
+        if (!is_array($grantTypes)) {
+            $grantTypes = json_decode($grantTypes, true) ?? [];
+        }
+
+        // For client_credentials grant, check if it's in the grant_types array
+        if ($grantType === 'client_credentials') {
+            return in_array('client_credentials', $grantTypes);
+        }
+
+        // For other grant types, check if they're supported
+        return in_array($grantType, $grantTypes);
     }
 }
