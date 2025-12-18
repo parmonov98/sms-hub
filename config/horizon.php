@@ -21,7 +21,7 @@ return [
 
     'defaults' => [
         'supervisor' => [
-            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'connection' => env('QUEUE_CONNECTION', 'redis'),
             'queue' => explode(',', env('HORIZON_QUEUES', env('REDIS_QUEUE', 'default'))),
             'balance' => env('HORIZON_BALANCE', 'auto'),
             'maxProcesses' => (int) env('HORIZON_MAX_PROCESSES', 10),
@@ -34,7 +34,7 @@ return [
     'environments' => [
         'production' => [
             'supervisor-1' => [
-                'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+                'connection' => env('QUEUE_CONNECTION', 'redis'),
                 'queue' => explode(',', env('HORIZON_QUEUES', env('REDIS_QUEUE', 'default'))),
                 'balance' => env('HORIZON_BALANCE', 'auto'),
                 'maxProcesses' => (int) env('HORIZON_MAX_PROCESSES', 20),
@@ -48,7 +48,7 @@ return [
 
         'local' => [
             'supervisor-1' => [
-                'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+                'connection' => env('QUEUE_CONNECTION', 'redis'),
                 'queue' => explode(',', env('HORIZON_QUEUES', env('REDIS_QUEUE', 'default'))),
                 'balance' => 'simple',
                 'maxProcesses' => 5,
