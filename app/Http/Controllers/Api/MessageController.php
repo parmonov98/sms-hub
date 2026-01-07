@@ -218,9 +218,9 @@ class MessageController extends Controller
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
-     *         description="Unique message identifier (UUID)",
+     *         description="Unique message identifier",
      *         required=true,
-     *         @OA\Schema(type="string", format="uuid", example="550e8400-e29b-41d4-a716-446655440000")
+     *         @OA\Schema(type="integer", example=1)
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -245,7 +245,7 @@ class MessageController extends Controller
      *     )
      * )
      */
-    public function show(string $id)
+    public function show(int $id)
     {
         $message = \App\Models\Message::find($id);
 
