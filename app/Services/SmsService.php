@@ -116,18 +116,42 @@ class SmsService
 
         // Get the access token for this provider
         $accessToken = $provider->accessToken;
-        
+
         if (!$accessToken || !$accessToken->isValid()) {
-            Log::warning('No valid access token for provider', [
+            Log::info('Token invalid or missing, attempting refresh', [
                 'provider_id' => $provider->id,
                 'provider_name' => $provider->display_name,
             ]);
-            return null;
+
+            $tokenService = app(ProviderTokenService::class);
+            $accessToken = match ($provider->display_name) {
+                'eskiz' => $tokenService->refreshEskizToken($provider),
+                default => null,
+            };
+
+            if (!$accessToken || !$accessToken->isValid()) {
+                Log::warning('No valid access token for provider after refresh attempt', [
+                    'provider_id' => $provider->id,
+                    'provider_name' => $provider->display_name,
+                ]);
+                return null;
+            }
         }
 
         // Create provider instance with token
         $providerInstance = match ($provider->display_name) {
-            'eskiz' => new EskizProvider(['token' => $accessToken->token_value]),
+            'eskiz' => new EskizProvider([
+                'token' => $accessToken->token_value,
+                'token_refresher' => function () use ($provider) {
+                    $tokenService = app(ProviderTokenService::class);
+                    $newToken = $tokenService->refreshEskizToken($provider);
+                    if ($newToken) {
+                        unset($this->providerInstances[$provider->id]);
+                        return $newToken->token_value;
+                    }
+                    return null;
+                },
+            ]),
             default => null,
         };
 

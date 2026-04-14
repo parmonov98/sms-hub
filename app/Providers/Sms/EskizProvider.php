@@ -9,10 +9,12 @@ class EskizProvider implements SmsProviderInterface
 {
     private string $token;
     private string $baseUrl = 'https://notify.eskiz.uz/api';
+    private ?\Closure $tokenRefresher = null;
 
     public function __construct(array $config)
     {
         $this->token = $config['token'] ?? '';
+        $this->tokenRefresher = $config['token_refresher'] ?? null;
     }
 
     public function send(string $to, string $from, string $text, array $options = []): array
@@ -47,6 +49,39 @@ class EskizProvider implements SmsProviderInterface
 
             $errorMessage = $response->json()['message'] ?? 'Unknown error';
             $statusCode = $response->status();
+
+            // On 401, try refreshing token and retry once
+            if ($statusCode === 401 && $this->tokenRefresher) {
+                Log::info('Eskiz 401 received, attempting token refresh and retry', ['to' => $to]);
+                $newToken = ($this->tokenRefresher)();
+                if ($newToken) {
+                    $this->token = $newToken;
+                    $this->tokenRefresher = null; // prevent infinite retry
+
+                    $retryResponse = Http::withHeaders([
+                        'Authorization' => 'Bearer ' . $this->token,
+                    ])->asForm()->post($this->baseUrl . '/message/sms/send', [
+                        'mobile_phone' => $to,
+                        'message' => $text,
+                        'from' => $from,
+                        'callback_url' => $options['callback_url'] ?? url('/api/v1/sms/delivery-callback'),
+                    ]);
+
+                    if ($retryResponse->successful()) {
+                        $data = $retryResponse->json();
+                        return [
+                            'status' => 'sent',
+                            'message_id' => $data['id'] ?? null,
+                            'cost' => $data['price'] ?? 0,
+                            'currency' => 'UZS',
+                            'provider_response' => $data,
+                        ];
+                    }
+
+                    $errorMessage = $retryResponse->json()['message'] ?? 'Unknown error';
+                    $statusCode = $retryResponse->status();
+                }
+            }
 
             // Handle specific Eskiz API errors
             if ($statusCode === 401) {
