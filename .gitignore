@@ -108,6 +108,10 @@ phpunit.xml.bak
 config/local.php
 config/database.local.php
 
+# OAuth keys
+config/oauth-private.key
+config/oauth-public.key
+
 # PEAR cache and download files
 /pear/cache/
 /pear/download/
