@@ -34,11 +34,27 @@ class SendSmsJob implements ShouldQueue
     public function handle(SmsService $smsService): void
     {
         $message = Message::find($this->messageId);
-        
+
         if (!$message) {
             Log::error('Message not found for SMS job', ['message_id' => $this->messageId]);
             return;
         }
+
+        // Atomically claim the message by transitioning queued -> processing.
+        // If another worker (cron re-dispatch, retry, parallel worker) already
+        // claimed it, $claimed will be 0 and we bail out - preventing duplicate sends.
+        $claimed = Message::where('id', $this->messageId)
+            ->where('status', 'queued')
+            ->update(['status' => 'processing']);
+
+        if (!$claimed) {
+            Log::info('SMS job skipped - message already claimed by another worker', [
+                'message_id' => $this->messageId,
+            ]);
+            return;
+        }
+
+        $message->refresh();
 
         // Send SMS (no project needed in new system)
         $result = $smsService->sendSms(
