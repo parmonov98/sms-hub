@@ -59,8 +59,8 @@ class ProviderTokenService
     public function refreshEskizToken(Provider $provider): ?ProviderToken
     {
         try {
-            $email = env('ESKIZ_EMAIL');
-            $password = env('ESKIZ_PASSWORD');
+            $email = config('services.eskiz.email');
+            $password = config('services.eskiz.password');
 
             if (!$email || !$password) {
                 Log::error('Eskiz credentials not configured');

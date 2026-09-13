@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Provider;
 use App\Models\ProviderToken;
 use App\Providers\Sms\EskizProvider;
+use App\Providers\Sms\MobSmsProvider;
 use App\Providers\Sms\SmsProviderInterface;
 use Illuminate\Support\Facades\Log;
 
@@ -114,7 +115,26 @@ class SmsService
             return $this->providerInstances[$key];
         }
 
-        // Get the access token for this provider
+        $providerInstance = match ($provider->display_name) {
+            'eskiz' => $this->makeEskizProvider($provider),
+            'mobsms' => $this->makeMobSmsProvider($provider),
+            default => null,
+        };
+
+        if ($providerInstance) {
+            $this->providerInstances[$key] = $providerInstance;
+            return $providerInstance;
+        }
+
+        return null;
+    }
+
+    /**
+     * Build an Eskiz provider instance, ensuring a valid OAuth token
+     * (refreshing from credentials if the stored one is missing/expired).
+     */
+    private function makeEskizProvider(Provider $provider): ?SmsProviderInterface
+    {
         $accessToken = $provider->accessToken;
 
         if (!$accessToken || !$accessToken->isValid()) {
@@ -124,10 +144,7 @@ class SmsService
             ]);
 
             $tokenService = app(ProviderTokenService::class);
-            $accessToken = match ($provider->display_name) {
-                'eskiz' => $tokenService->refreshEskizToken($provider),
-                default => null,
-            };
+            $accessToken = $tokenService->refreshEskizToken($provider);
 
             if (!$accessToken || !$accessToken->isValid()) {
                 Log::warning('No valid access token for provider after refresh attempt', [
@@ -138,29 +155,40 @@ class SmsService
             }
         }
 
-        // Create provider instance with token
-        $providerInstance = match ($provider->display_name) {
-            'eskiz' => new EskizProvider([
-                'token' => $accessToken->token_value,
-                'token_refresher' => function () use ($provider) {
-                    $tokenService = app(ProviderTokenService::class);
-                    $newToken = $tokenService->refreshEskizToken($provider);
-                    if ($newToken) {
-                        unset($this->providerInstances[$provider->id]);
-                        return $newToken->token_value;
-                    }
-                    return null;
-                },
-            ]),
-            default => null,
-        };
+        return new EskizProvider([
+            'token' => $accessToken->token_value,
+            'token_refresher' => function () use ($provider) {
+                $tokenService = app(ProviderTokenService::class);
+                $newToken = $tokenService->refreshEskizToken($provider);
+                if ($newToken) {
+                    unset($this->providerInstances[$provider->id]);
+                    return $newToken->token_value;
+                }
+                return null;
+            },
+        ]);
+    }
 
-        if ($providerInstance) {
-            $this->providerInstances[$key] = $providerInstance;
-            return $providerInstance;
+    /**
+     * Build a MobSMS provider instance. MobSMS uses a static API key stored
+     * in the database (as a non-expiring ProviderToken), not an OAuth flow.
+     */
+    private function makeMobSmsProvider(Provider $provider): ?SmsProviderInterface
+    {
+        $token = $provider->accessToken;
+
+        if (!$token || !$token->isValid() || empty($token->token_value)) {
+            Log::warning('MobSMS API key missing or invalid', [
+                'provider_id' => $provider->id,
+                'provider_name' => $provider->display_name,
+            ]);
+            return null;
         }
 
-        return null;
+        return new MobSmsProvider([
+            'api_key' => $token->token_value,
+            'base_url' => config('services.mobsms.base_url', 'https://api.mobsms.cloud'),
+        ]);
     }
 
     /**

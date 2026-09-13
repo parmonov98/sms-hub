@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'eskiz' => [
+        'email' => env('ESKIZ_EMAIL'),
+        'password' => env('ESKIZ_PASSWORD'),
+    ],
+
+    'mobsms' => [
+        // API key is stored in the database (provider_tokens), not here.
+        'base_url' => env('MOBSMS_BASE_URL', 'https://api.mobsms.cloud'),
+    ],
+
 ];

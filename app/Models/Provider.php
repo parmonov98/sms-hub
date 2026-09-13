@@ -23,6 +23,23 @@ class Provider extends Model
     ];
 
     /**
+     * Enforce a single active SMS provider (global switch): whenever a
+     * provider is saved as enabled, all other providers are disabled.
+     * The bulk update below does not fire model events, so there is no
+     * recursion.
+     */
+    protected static function booted(): void
+    {
+        static::saved(function (Provider $provider) {
+            if ($provider->is_enabled) {
+                static::where('id', '!=', $provider->id)
+                    ->where('is_enabled', true)
+                    ->update(['is_enabled' => false]);
+            }
+        });
+    }
+
+    /**
      * Get the provider tokens for this provider.
      */
     public function tokens()

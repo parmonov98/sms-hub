@@ -49,11 +49,32 @@ class ProviderResource extends Resource
                             ->helperText('Lower numbers have higher priority (0 = highest)'),
 
                         Forms\Components\Toggle::make('is_enabled')
-                            ->label('Enabled')
+                            ->label('Enabled (active provider)')
                             ->required()
                             ->default(true)
-                            ->helperText('Enable or disable this provider'),
+                            ->helperText('Only one provider can be active at a time. Enabling this provider automatically disables the others (global switch, e.g. Eskiz to MobSMS).'),
                     ])->columns(2),
+
+                Forms\Components\Section::make('API Credentials')
+                    ->description('MobSMS authenticates with a static API key (Developers → API keys). It is stored securely in the database, not in .env.')
+                    ->schema([
+                        Forms\Components\TextInput::make('api_key')
+                            ->label('MobSMS API Key')
+                            ->password()
+                            ->revealable()
+                            ->autocomplete(false)
+                            // Not a Provider column: persisted as a ProviderToken
+                            // by the Create/Edit page (see afterCreate/afterSave).
+                            ->dehydrated(false)
+                            ->helperText('Leave blank to keep the current key unchanged.')
+                            ->afterStateHydrated(function (Forms\Components\TextInput $component, ?Provider $record) {
+                                if ($record) {
+                                    $component->state(optional($record->accessToken)->token_value);
+                                }
+                            })
+                            ->columnSpanFull(),
+                    ])
+                    ->visible(fn (Forms\Get $get): bool => $get('display_name') === 'mobsms'),
 
                 Forms\Components\Section::make('Provider Capabilities')
                     ->schema([
