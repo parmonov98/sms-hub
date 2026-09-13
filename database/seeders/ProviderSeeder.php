@@ -21,6 +21,13 @@ class ProviderSeeder extends Seeder
                 'is_enabled' => true,
                 'priority' => 1,
             ],
+            [
+                'display_name' => 'mobsms',
+                'description' => 'MobSMS Cloud - Android gateway (no sender ID / template moderation)',
+                'capabilities' => ['dlr' => true, 'unicode' => true, 'concat' => true, 'flash' => false],
+                'is_enabled' => false,
+                'priority' => 2,
+            ],
         ];
 
         foreach ($providers as $provider) {

@@ -62,9 +62,9 @@ class RefreshEskizToken extends Command
             $this->info("📋 No current token found");
         }
 
-        // Check environment variables
-        $email = env('ESKIZ_EMAIL');
-        $password = env('ESKIZ_PASSWORD');
+        // Check configured credentials (cache-safe: works with config:cache)
+        $email = config('services.eskiz.email');
+        $password = config('services.eskiz.password');
 
         if (!$email || !$password) {
             $this->error('❌ Eskiz credentials not configured!');
